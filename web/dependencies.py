@@ -1,12 +1,11 @@
+import database
 from fastapi import Request
 from loguru import logger
-
-from .database import SessionLocal
 
 
 # database dependency
 def get_db():
-    db = SessionLocal()
+    db = database.SessionLocal()
     try:
         yield db
     finally:
@@ -14,7 +13,7 @@ def get_db():
 
 
 # logging dependency
-def logging_dependency(request: Request):
+def logging(request: Request):
     logger.debug("----------")
     logger.debug(f"{request.method} {request.url}")
     logger.debug("Params:")

@@ -2,9 +2,6 @@ from pydantic import BaseSettings, Field
 
 
 class Settings(BaseSettings):
-    SECRET_KEY: str = Field("uniq secret key", env="SECRET_KEY")
-    # constants
-    VAR: str = Field("test var", env="VAR")
     # db
     POSTGRES_USER: str = Field("user name", env="POSTGRES_USER")
     POSTGRES_PASSWORD: str = Field("user password", env="POSTGRES_PASSWORD")

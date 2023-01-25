@@ -1,9 +1,9 @@
+from dependencies import get_db
 from fastapi import APIRouter, Depends, HTTPException
 from loguru import logger
 from sqlalchemy.orm import Session
 
-from ..dependencies import get_db
-from . import crud
+from .crud import get_users
 from .schema import User
 
 web = APIRouter(
@@ -37,7 +37,7 @@ def foo_thr():
 
 @web.get("/users/", response_model=list[User])
 def read_users(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-    users = crud.get_users(db, skip=skip, limit=limit)
+    users = get_users(db, skip=skip, limit=limit)
     return users
 
 

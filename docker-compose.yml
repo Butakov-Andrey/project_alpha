@@ -7,9 +7,9 @@ services:
     build:
       context: .
       dockerfile: docker/app.Dockerfile
-    command: uvicorn core.main:app --host 0.0.0.0 --port 8000 --reload
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
     volumes:
-      - ./:/code
+      - ./web/:/code
     expose:
       - 8000
     depends_on:
@@ -17,7 +17,7 @@ services:
     env_file:
       - ./.env
     networks:
-      - djangonetwork
+      - alpha_network
 
   db:
     container_name: db
@@ -26,17 +26,17 @@ services:
       context: .
       dockerfile: docker/db.Dockerfile
     volumes:
-      - fastapi_postgres_data:/var/lib/postgresql/data/
+      - postgres_data:/var/lib/postgresql/data/
     ports:
       - 5432:5432
     env_file:
       - ./.env
     networks:
-      - djangonetwork
+      - alpha_network
 
   nginx:
-    container_name: test-nginx
-    image: test-nginx
+    container_name: nginx
+    image: nginx
     build:
       context: .
       dockerfile: docker/nginx.Dockerfile
@@ -45,11 +45,11 @@ services:
     depends_on:
       - web
     networks:
-      - djangonetwork
+      - alpha_network
 
 volumes:
-  fastapi_postgres_data:
+  postgres_data:
 
 networks:
-  djangonetwork:
+  alpha_network:
     driver: bridge
