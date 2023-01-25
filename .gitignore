@@ -1,0 +1,7 @@
+**/.env
+**/.ssh
+*.log
+
+env/
+.vscode/
+__pycache__/
