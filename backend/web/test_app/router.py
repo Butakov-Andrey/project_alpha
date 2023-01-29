@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from loguru import logger
 from sqlalchemy.orm import Session
 
-from .crud import get_user, get_user_by_email, get_users
+from .crud import create_user, get_user, get_user_by_email, get_users
 from .schema import User
 
 web = APIRouter(
@@ -52,7 +52,7 @@ def read_user(user_id: int, db: Session = Depends(get_db)):
 
 
 @web.post("/users/", response_model=User)
-def create_user(user: User, db: Session = Depends(get_db)):
+def add_user(user: User, db: Session = Depends(get_db)):
     db_user = get_user_by_email(db, email=user.email)
     if db_user:
         raise HTTPException(status_code=400, detail="Email already registered")

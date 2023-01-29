@@ -1,4 +1,4 @@
-files: ^web/
+files: ^backend/web/
 repos:
 # python import sorting - will amend files
 - repo: https://github.com/pre-commit/mirrors-isort

@@ -1,36 +1,36 @@
-# Fastapi template
-Шаблон реализован в виде монорепозитория для микросервисов (web в директории web/)  
-Для запуска приложений в корень проекта необходимо добавить файл с переменными окружения .env  
-При разработке в Docker в файле .env указать имя контейнера с БД (db)  
+# Project Alpha
+Проект реализован в виде монорепозитория для микросервисов backend и frontend  
 
-## Для разработки в Docker:
-Создание образов и запуск контейнеров:
-```
-$ docker-compose up -d --build
-```
-
-## Pre-commit
 Установить pre-commit хуки:
 ```
 $ pre-commit install
 ```
 [Указать директорию](.pre-commit-config.yaml) с приложением в которой будут отрабатывать pre-commit хуки:  
 ```
-files: ^web/
+files: ^backend/web/
+```
+Создание образов и запуск контейнеров:
+```
+$ docker-compose up -d --build
 ```
 
-## Миграции для приложения web
-Создать директорию web/alembic/versions/  
+# *server*
+## Nginx
+pass
+
+# *backend*
+## Web
+Создать директорию *backend/web/alembic/versions/*  
 Cоздать миграции:
 ```
 $ docker-compose exec web alembic revision --autogenerate -m "Testing table"
 ```
-Проверить сгенерированные миграции в директории web/alembic/versions/  
+Проверить сгенерированные миграции в директории *backend/web/alembic/versions/*  
 Применить миграции и обновить базу данных:
 ```
 $ docker-compose exec web alembic upgrade head
 ```
+Создать директорию *backend/web/logs/*, куда будут сохраняться логи  
 
-## Логирование
-Создать директорию web/alembic/versions/  
-Логи сохраняются в директорию web/logs/  
+# *frontend*
+pass
