@@ -15,7 +15,7 @@ app = FastAPI(
         "email": "6669.butakov@gmail.com",
     },
     openapi_url="/openapi.json",
-    docs_url="/swagger",
+    docs_url="/docs",
     redoc_url=None,
     # prefix распространяется на все роуты и документацию
     root_path="/auth",

@@ -3,11 +3,12 @@
 
 Установить pre-commit хуки:
 ```
+$ pip install pre-commit
 $ pre-commit install
 ```
 [Указать директорию](.pre-commit-config.yaml) с приложением в которой будут отрабатывать pre-commit хуки:  
 ```
-files: ^backend/web/
+files: ^(backend/web/|backend/auth/)
 ```
 Создание образов и запуск контейнеров:
 ```
