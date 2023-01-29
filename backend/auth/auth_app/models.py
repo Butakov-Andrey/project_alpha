@@ -1,7 +1,7 @@
-import database
+import postgres_db
 from sqlalchemy import Boolean, Column, Integer, String
 
-Base = database.Base
+Base = postgres_db.Base
 
 
 class User(Base):

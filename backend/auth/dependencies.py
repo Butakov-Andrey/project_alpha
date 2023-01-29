@@ -1,11 +1,11 @@
-import database
+import postgres_db
 from fastapi import Request
 from loguru import logger
 
 
 # database dependency
 def get_db():
-    db = database.SessionLocal()
+    db = postgres_db.SessionLocal()
     try:
         yield db
     finally:

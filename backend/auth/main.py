@@ -2,8 +2,10 @@ import config
 import dependencies
 import logger
 from auth_app import router
-from fastapi import Depends, FastAPI
+from fastapi import Depends, FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+from fastapi_jwt_auth.exceptions import AuthJWTException
 
 logger.add_loggers()
 
@@ -21,6 +23,7 @@ app = FastAPI(
     root_path="/auth",
 )
 
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=config.origins,
@@ -28,5 +31,11 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.exception_handler(AuthJWTException)
+def authjwt_exception_handler(request: Request, exc: AuthJWTException):
+    return JSONResponse(status_code=exc.status_code, content={"detail": exc.message})
+
 
 app.include_router(router.auth, dependencies=[Depends(dependencies.logging)])

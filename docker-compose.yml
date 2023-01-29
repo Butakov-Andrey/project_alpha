@@ -52,6 +52,17 @@ services:
     networks:
       - alpha_network
 
+  redis:
+    container_name: redis
+    image: redis
+    build:
+      context: .
+      dockerfile: docker/redis.Dockerfile
+    ports:
+      - "6379:6379"
+    networks:
+      - alpha_network
+
   nginx:
     container_name: nginx
     image: nginx
