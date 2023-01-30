@@ -9,18 +9,24 @@ class Settings(BaseSettings):
     POSTGRES_PASSWORD: str = Field("pg user password", env="POSTGRES_PASSWORD")
     POSTGRES_DB: str = Field("database name", env="POSTGRES_DB")
     POSTGRES_SERVER: str = Field("pg container name", env="POSTGRES_SERVER")
-    # redis
+
+    # redis - для хранения черного списка токенов
     REDIS_HOST: str = Field("redis container name", env="REDIS_HOST")
     REDIS_PORT: str = Field("redis port", env="REDIS_PORT")
+
     # jwt
     authjwt_secret_key: str = Field("auth secret", env="AUTH_SECRET")
     authjwt_denylist_enabled: bool = True
     authjwt_denylist_token_checks: set = {"access", "refresh"}
-    access_expires: int = timedelta(minutes=15).total_seconds()
-    refresh_expires: int = timedelta(days=30).total_seconds()
     authjwt_token_location: set = {"cookies"}
     authjwt_cookie_secure: bool = False
     authjwt_cookie_csrf_protect: bool = True
+    # время хранения токена в черном списке
+    access_expires: int = timedelta(minutes=15).total_seconds()
+    refresh_expires: int = timedelta(days=30).total_seconds()
+    # время жизни токена
+    authjwt_access_token_expires: int = timedelta(minutes=15).total_seconds()
+    authjwt_refresh_token_expires: int = timedelta(days=30).total_seconds()
     # Change to 'lax' in production to make your website more secure from CSRF Attacks, default is None
     # authjwt_cookie_samesite: str = 'lax'
 

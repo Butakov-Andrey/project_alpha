@@ -1,6 +1,5 @@
 import config
 from fastapi import APIRouter, Depends, HTTPException
-from fastapi_jwt_auth import AuthJWT
 from redis_db import redis_conn
 
 from .schema import User
@@ -14,21 +13,6 @@ auth = APIRouter(
 )
 
 
-@AuthJWT.load_config
-def get_config():
-    return config.Settings()
-
-
-@AuthJWT.token_in_denylist_loader
-def check_if_token_in_denylist(decrypted_token):
-    """
-    Проверяем, есть ли token в черном списке
-    """
-    jti = decrypted_token["jti"]
-    entry = redis_conn.get(jti)
-    return entry and entry == "true"
-
-
 @auth.post("/login")
 def login(user: User, Authorize: UpdatedAuthJWT = Depends()):
     """
@@ -36,7 +20,10 @@ def login(user: User, Authorize: UpdatedAuthJWT = Depends()):
     """
     if user.username != "test" or user.password != "test":
         raise HTTPException(status_code=401, detail="Bad username or password")
-    access_token = Authorize.create_access_token(subject=user.username, fresh=True)
+    another_claims = {"foo": ["fiz", "baz"]}
+    access_token = Authorize.create_access_token(
+        subject=user.username, user_claims=another_claims, fresh=True
+    )
     refresh_token = Authorize.create_refresh_token(subject=user.username)
     Authorize.set_access_cookies(access_token)
     Authorize.set_refresh_cookies(refresh_token)
@@ -107,14 +94,21 @@ def partially_protected(Authorize: UpdatedAuthJWT = Depends()):
 
 
 @auth.get("/protected")
-def protected(Authorize: AuthJWT = Depends()):
+def protected(Authorize: UpdatedAuthJWT = Depends()):
     Authorize.jwt_required()
     current_user = Authorize.get_jwt_subject()
     return {"user": current_user}
 
 
 @auth.get("/protected-fresh")
-def protected_fresh(Authorize: AuthJWT = Depends()):
+def protected_fresh(Authorize: UpdatedAuthJWT = Depends()):
     Authorize.fresh_jwt_required()
     current_user = Authorize.get_jwt_subject()
     return {"user": current_user}
+
+
+@auth.get("/claims")
+def user(Authorize: UpdatedAuthJWT = Depends()):
+    Authorize.jwt_required()
+    foo_claims = Authorize.get_raw_jwt()["foo"]
+    return {"foo": foo_claims}

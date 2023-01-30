@@ -5,7 +5,9 @@ from auth_app import router
 from fastapi import Depends, FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from fastapi_jwt_auth import AuthJWT
 from fastapi_jwt_auth.exceptions import AuthJWTException
+from redis_db import redis_conn
 
 logger.add_loggers()
 
@@ -33,9 +35,27 @@ app.add_middleware(
 )
 
 
+# добавляем в любое приложение, где необходима авторизация
+@AuthJWT.load_config
+def get_config():
+    return config.Settings()
+
+
+# добавляем в любое приложение, где необходима авторизация
 @app.exception_handler(AuthJWTException)
 def authjwt_exception_handler(request: Request, exc: AuthJWTException):
     return JSONResponse(status_code=exc.status_code, content={"detail": exc.message})
+
+
+# добавляем в любое приложение, где необходима авторизация
+@AuthJWT.token_in_denylist_loader
+def check_if_token_in_denylist(decrypted_token):
+    """
+    Проверяем, есть ли token в черном списке
+    """
+    jti = decrypted_token["jti"]
+    entry = redis_conn.get(jti)
+    return entry and entry == "true"
 
 
 app.include_router(router.auth, dependencies=[Depends(dependencies.logging)])
