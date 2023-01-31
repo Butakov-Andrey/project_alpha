@@ -22,7 +22,7 @@ pass
 # *backend*
 ## Web
 Создать директорию *backend/web/alembic/versions/*  
-Cоздать миграции:
+Cоздать миграции ("web" - имя контейнера, в котором будут создаваться миграции):
 ```
 $ docker-compose exec web alembic revision --autogenerate -m "Testing table"
 ```

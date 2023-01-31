@@ -7,6 +7,11 @@ from fastapi_jwt_auth.exceptions import CSRFError, JWTDecodeError, MissingTokenE
 
 
 class UpdatedAuthJWT(AuthJWT):
+    """
+    Класс из библиотеки fastapi-jwt-auth (https://github.com/IndominusByte/fastapi-jwt-auth)
+    Переопределен один метод
+    """
+
     def _verify_and_get_jwt_in_cookies(
         self,
         type_token: str,
