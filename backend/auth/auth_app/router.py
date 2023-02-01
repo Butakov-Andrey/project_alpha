@@ -1,13 +1,14 @@
 import config
 from dependencies import get_db
 from fastapi import APIRouter, Depends, HTTPException
+from loguru import logger
 from redis_db import redis_conn
 from sqlalchemy.orm import Session
 
-from . import utils
 from .crud import create_user, get_user_by_email, get_users
-from .schema import User, UserOut
+from .schema import UserIn, UserOut
 from .updated_auth import UpdatedAuthJWT
+from .utils import check_password
 
 auth = APIRouter(
     # prefix распространяется на этот роут
@@ -17,17 +18,20 @@ auth = APIRouter(
 )
 
 
-@auth.post("/register")
-def register(user: User, db: Session = Depends(get_db)):
+@auth.post("/register", response_model=UserOut)
+def register(user: UserIn, db: Session = Depends(get_db)):
     db_user = get_user_by_email(db, email=user.email)
     if db_user:
-        raise HTTPException(status_code=400, detail="Email already registered")
+        logger.info(f"Email {user.email} already registered!")
+        raise HTTPException(
+            status_code=400, detail=f"Email {user.email} already registered!"
+        )
     return create_user(db=db, user=user)
 
 
 @auth.post("/login")
 def login(
-    user: User, Authorize: UpdatedAuthJWT = Depends(), db: Session = Depends(get_db)
+    user: UserIn, Authorize: UpdatedAuthJWT = Depends(), db: Session = Depends(get_db)
 ):
     """
     Получаем fresh_access_token и refresh_token
@@ -35,8 +39,7 @@ def login(
     db_user = get_user_by_email(db, email=user.email)
     if db_user:
         another_claims = {"info": "Дополнительная информация в jwt"}
-
-        if utils.check_password(user.password, db_user.hashed_password):
+        if check_password(user.password, db_user.hashed_password):
             access_token = Authorize.create_access_token(
                 subject=user.email, user_claims=another_claims, fresh=True
             )
@@ -50,7 +53,7 @@ def login(
 
 @auth.post("/fresh-login")
 def fresh_login(
-    user: User, Authorize: UpdatedAuthJWT = Depends(), db: Session = Depends(get_db)
+    user: UserIn, Authorize: UpdatedAuthJWT = Depends(), db: Session = Depends(get_db)
 ):
     """
     Получаем fresh_access_token, не меняем refresh_token.
@@ -58,8 +61,7 @@ def fresh_login(
     Пример: удаление репозитория в Github
     """
     db_user = get_user_by_email(db, email=user.email)
-
-    if utils.check_password(user.password, db_user.hashed_password):
+    if check_password(user.password, db_user.hashed_password):
         new_access_token = Authorize.create_access_token(subject=user.email, fresh=True)
         Authorize.set_access_cookies(new_access_token)
         return {"msg": "Successfully login"}
@@ -71,7 +73,7 @@ def fresh_login(
 def refresh(Authorize: UpdatedAuthJWT = Depends()):
     """
     Получаем access_token.
-    fresh - значит, что для этого токена проверялись логин и пароль
+    fresh=False - значит, что для этого токена не проверялись логин и пароль
     """
     Authorize.jwt_refresh_token_required()
     current_user = Authorize.get_jwt_subject()
@@ -133,8 +135,8 @@ def protected_fresh(Authorize: UpdatedAuthJWT = Depends()):
 @auth.get("/claims")
 def user(Authorize: UpdatedAuthJWT = Depends()):
     Authorize.jwt_required()
-    foo_claims = Authorize.get_raw_jwt()["foo"]
-    return {"foo": foo_claims}
+    foo_claims = Authorize.get_raw_jwt()["info"]
+    return {"info": foo_claims}
 
 
 @auth.get("/users", response_model=list[UserOut])

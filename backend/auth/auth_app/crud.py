@@ -11,11 +11,10 @@ def get_users(db: Session, skip: int = 0, limit: int = 10):
     return db.query(models.User).offset(skip).limit(limit).all()
 
 
-def create_user(db: Session, user: schema.User):
+def create_user(db: Session, user: schema.UserIn):
     hashed_password = utils.hash_password(user.password)
     db_user = models.User(email=user.email, hashed_password=hashed_password)
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
-    # TODO возвращает хэш пароля, убрать
     return db_user

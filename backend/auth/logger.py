@@ -16,3 +16,10 @@ def add_loggers():
         rotation="1 week",
         compression="zip",
     )
+    logger.add(
+        "logs/error.log",
+        format="{time} {level} {message}",
+        level="ERROR",
+        rotation="1 week",
+        compression="zip",
+    )
