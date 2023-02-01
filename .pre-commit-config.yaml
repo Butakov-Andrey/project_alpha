@@ -1,10 +1,11 @@
-files: ^backend/web/
+files: ^(backend/web/|backend/auth/)
 repos:
 # python import sorting - will amend files
 - repo: https://github.com/pre-commit/mirrors-isort
   rev: v5.10.1
   hooks:
     - id: isort
+      args: ["--profile", "black"]
       language_version: python3.11
 
 # python code formatting - will amend files

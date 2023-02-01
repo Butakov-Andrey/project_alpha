@@ -1,5 +1,6 @@
 from dependencies import get_db
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi_jwt_auth import AuthJWT
 from loguru import logger
 from sqlalchemy.orm import Session
 
@@ -18,6 +19,12 @@ web = APIRouter(
 def foo():
     logger.info("That's it, beautiful and simple logging!")
     return {"users": 666}
+
+
+@web.get("/protected")
+def protected(Authorize: AuthJWT = Depends()):
+    Authorize.jwt_required()
+    return {"user": "777777777"}
 
 
 @web.get("/sec")

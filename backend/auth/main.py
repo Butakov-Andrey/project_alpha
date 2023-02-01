@@ -1,18 +1,18 @@
 import config
 import dependencies
 import logger
+from auth_app import router
 from fastapi import Depends, FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi_jwt_auth import AuthJWT
 from fastapi_jwt_auth.exceptions import AuthJWTException
 from redis_db import redis_conn
-from test_app import router
 
 logger.add_loggers()
 
 app = FastAPI(
-    title="Project Alpha",
+    title="Auth",
     version="0.0.1",
     contact={
         "name": "Andrey Butakov",
@@ -22,8 +22,9 @@ app = FastAPI(
     docs_url="/docs",
     redoc_url=None,
     # prefix распространяется на все роуты и документацию
-    root_path="/web",
+    root_path="/auth",
 )
+
 
 app.add_middleware(
     CORSMiddleware,
@@ -57,4 +58,4 @@ def check_if_token_in_denylist(decrypted_token):
     return entry and entry == "true"
 
 
-app.include_router(router.web, dependencies=[Depends(dependencies.logging)])
+app.include_router(router.auth, dependencies=[Depends(dependencies.logging)])
