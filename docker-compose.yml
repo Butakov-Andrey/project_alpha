@@ -18,13 +18,13 @@ services:
           cpus: '1'
           memory: 256M
     volumes:
-      - ./backend/auth/:/code
+      - ./apps/auth/:/code
     expose:
       - 8001
     depends_on:
       - db
     env_file:
-      - ./backend/.env
+      - ./apps/.env
     networks:
       - alpha_network
 
@@ -36,13 +36,13 @@ services:
       dockerfile: docker/web.Dockerfile
     command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
     volumes:
-      - ./backend/web/:/code
+      - ./apps/web/:/code
     expose:
       - 8000
     depends_on:
       - db
     env_file:
-      - ./backend/.env
+      - ./apps/.env
     networks:
       - alpha_network
 
@@ -57,7 +57,7 @@ services:
     ports:
       - 5432:5432
     env_file:
-      - ./backend/.env
+      - ./apps/.env
     networks:
       - alpha_network
 
