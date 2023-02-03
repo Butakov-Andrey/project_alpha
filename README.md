@@ -8,7 +8,7 @@ $ pre-commit install
 ```
 [Указать директорию](.pre-commit-config.yaml) с приложением в которой будут отрабатывать pre-commit хуки:  
 ```
-files: ^(backend/web/|backend/auth/)
+files: ^(apps/core_dj/|apps/another_app/)
 ```
 Создание образов и запуск контейнеров:
 ```

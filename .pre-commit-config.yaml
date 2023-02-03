@@ -1,4 +1,6 @@
-files: ^(backend/web/|backend/auth/)
+# files: ^(backend/web/|backend/auth/)
+files: ^(apps/core_dj)
+exclude: ^(apps/core_dj/accounts/migrations)
 repos:
 # python import sorting - will amend files
 - repo: https://github.com/pre-commit/mirrors-isort
