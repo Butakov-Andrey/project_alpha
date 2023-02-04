@@ -1,0 +1,23 @@
+name: Testing
+
+on:
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  testing:
+    name: Testing...
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11"]
+
+    steps:
+    - name: Create env file
+      run: echo "${{ secrets.ENV_FILE }}" > apps/.env && pwd
+    - name: Run docker-compose
+      run: docker-compose up -d
+    - name: Run tests
+      run: docker-compose exec -T core_dj python manage.py test
+    - run: echo "🍏 This job's status is ${{ job.status }}."
