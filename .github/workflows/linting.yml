@@ -14,13 +14,9 @@ jobs:
         python-version: ["3.11"]
 
     steps:
-    - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
-    - run: echo "🐧 This job is now running on a ${{ runner.os }} server hosted by GitHub!"
-    - run: echo "🔎 The name of your branch is ${{ github.ref }} and your repository is ${{ github.repository }}."
     - name: Copy code and git pull
       uses: actions/checkout@v3
-    - run: echo "💡 The ${{ github.repository }} repository has been cloned to the runner."
-    - run: echo "🖥️ The workflow is now ready to test your code on the runner."
+    - run: echo "The ${{ github.repository }} repository has been cloned to the runner."
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v3
       with:
