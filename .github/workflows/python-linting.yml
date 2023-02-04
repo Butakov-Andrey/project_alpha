@@ -35,4 +35,4 @@ jobs:
     - name: Run docker-compose
       run: docker-compose up -d
     - name: Run tests
-      run: docker-compose exec core_dj python manage.py test
+      run: docker-compose exec -T core_dj python manage.py test
