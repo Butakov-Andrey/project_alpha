@@ -33,6 +33,6 @@ jobs:
     - name: Create env file
       run: echo "${{ secrets.ENV_FILE }}" > apps/.env && pwd
     - name: Run docker-compose
-      run: docker-compose core_dj up -d
+      run: docker-compose up -d
     - name: Run tests
       run: docker-compose exec core_dj python manage.py test
