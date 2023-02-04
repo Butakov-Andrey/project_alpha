@@ -9,14 +9,14 @@ services:
       dockerfile: docker/core_dj.Dockerfile
     command: python /code/manage.py runserver 0.0.0.0:8000
     # пример ограничения памяти для контейнера
-    deploy:
-      resources:
-        limits:
-          cpus: '2'
-          memory: 512M
-        reservations:
-          cpus: '1'
-          memory: 256M
+    # deploy:
+    #   resources:
+    #     limits:
+    #       cpus: '2'
+    #       memory: 512M
+    #     reservations:
+    #       cpus: '1'
+    #       memory: 256M
     volumes:
       - ./apps/core_dj/:/code
     expose:
