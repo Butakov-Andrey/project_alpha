@@ -1,33 +1,6 @@
 version: '3.8'
 
 services:
-  auth:
-    container_name: auth
-    image: auth
-    build:
-      context: .
-      dockerfile: docker/auth.Dockerfile
-    command: uvicorn main:app --host 0.0.0.0 --port 8001 --reload
-    # пример ограничения памяти для контейнера
-    deploy:
-      resources:
-        limits:
-          cpus: '2'
-          memory: 512M
-        reservations:
-          cpus: '1'
-          memory: 256M
-    volumes:
-      - ./backend/auth/:/code
-    expose:
-      - 8001
-    depends_on:
-      - db
-    env_file:
-      - ./backend/.env
-    networks:
-      - alpha_network
-
   web:
     container_name: web
     image: web
@@ -35,29 +8,39 @@ services:
       context: .
       dockerfile: docker/web.Dockerfile
     command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+    # пример ограничения памяти для контейнера
+    # deploy:
+    #   resources:
+    #     limits:
+    #       cpus: '2'
+    #       memory: 512M
+    #     reservations:
+    #       cpus: '1'
+    #       memory: 256M
     volumes:
-      - ./backend/web/:/code
+      - ./web/:/code
     expose:
       - 8000
     depends_on:
-      - db
+      - postgres
+      - redis
     env_file:
-      - ./backend/.env
+      - ./.env
     networks:
       - alpha_network
 
-  db:
-    container_name: db
-    image: db
+  postgres:
+    container_name: postgres
+    image: postgres
     build:
       context: .
-      dockerfile: docker/db.Dockerfile
+      dockerfile: docker/postgres.Dockerfile
     volumes:
       - postgres_data:/var/lib/postgresql/data/
     ports:
       - 5432:5432
     env_file:
-      - ./backend/.env
+      - ./.env
     networks:
       - alpha_network
 
@@ -70,7 +53,9 @@ services:
     volumes:
         - redis_data:/data
     ports:
-      - "6379:6379"
+      - 6379:6379
+    env_file:
+      - ./.env
     networks:
       - alpha_network
 

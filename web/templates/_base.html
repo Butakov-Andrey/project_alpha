@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>{% block title %}Project Alpha{% endblock %}</title>
+        <!-- css -->
+        <!-- http://127.0.0.1:1337/web/static/css/base.css -->
+        <link rel="stylesheet" href="{{ static }}/css/base.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/picnic">
+        <!-- HTMX -->
+        <!-- <script src="https://unpkg.com/htmx.org@1.8.5" integrity="sha384-7aHh9lqPYGYZ7sTHvzP1t3BAfLhYSTy9ArHdP3Xsr9/3TlGurYgcPBoFmXX2TX/w" crossorigin="anonymous"></script> -->
+        <!-- HTMX websockets -->
+        <!-- <script src="https://unpkg.com/htmx.org/dist/ext/ws.js"></script> -->
+    </head>
+    <body>
+        <!-- navbar -->
+        <nav class="demo">
+            <a href="{{ server }}/" class="brand">
+                <span>Project Alpha</span>
+            </a>
+            <div class="menu">
+                <a href="#" class="pseudo button icon-picture">
+                    Log In
+                </a>
+            </div>
+        </nav>
+        <!-- main page -->
+        <div id='main_page' class="container">
+            {% block content %}
+            {% endblock %}
+        </div>
+    </body>
+</html>

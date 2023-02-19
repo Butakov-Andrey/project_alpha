@@ -1,0 +1,19 @@
+flake8
+pre-commit
+python-dotenv
+# fastapi
+fastapi
+uvicorn
+email-validator
+bcrypt
+# postgres
+psycopg2-binary
+SQLAlchemy
+# redis
+redis
+# migrations
+alembic
+# templates
+Jinja2
+# jwt
+fastapi-jwt-auth

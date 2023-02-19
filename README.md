@@ -1,6 +1,13 @@
 # Project Alpha
 Проект реализован в виде монорепозитория для микросервисов backend и frontend  
 
+Установить pip-tools, создать requirements.txt и установить зависимости  
+(необходимо находиться в директории с *requirements.in*):
+```
+$ pip install pip-tools
+$ pip-compile
+$ pip-sync
+```
 Установить pre-commit хуки:
 ```
 $ pip install pre-commit
@@ -8,20 +15,19 @@ $ pre-commit install
 ```
 [Указать директорию](.pre-commit-config.yaml) с приложением в которой будут отрабатывать pre-commit хуки:  
 ```
-files: ^(backend/web/|backend/auth/)
+files: ^(web)
+```
+И [директорию](.pre-commit-config.yaml), которую pre-commit хуки должны игнорировать:
+```
+exclude: (?x).*/alembic($|/.*)
 ```
 Создание образов и запуск контейнеров:
 ```
 $ docker-compose up -d --build
 ```
 
-# *server*
-## Nginx
-pass
-
-# *backend*
 ## Web
-Создать директорию *backend/web/alembic/versions/*  
+Создать директорию *web/alembic/versions/*  
 Cоздать миграции ("web" - имя контейнера, в котором будут создаваться миграции):
 ```
 $ docker-compose exec web alembic revision --autogenerate -m "Testing table"
@@ -31,7 +37,3 @@ $ docker-compose exec web alembic revision --autogenerate -m "Testing table"
 ```
 $ docker-compose exec web alembic upgrade head
 ```
-Создать директорию *backend/web/logs/*, куда будут сохраняться логи  
-
-# *frontend*
-pass
