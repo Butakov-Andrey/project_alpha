@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>{% block title %}404 Not Found{% endblock %}</title>
+        <!-- css -->
+        <link rel="stylesheet" href="{{ static }}/css/base.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/picnic">
+    </head>
+    <body>
+        <div id='main_page' class="container">
+            <h1>The resource is missing!</h1>
+            <p>{{ error }}</p>
+            <p>Code - {{ status_code }}</p>
+            <a href="{{ server }}/" class="brand">
+                <span>Home</span>
+            </a>
+        <div>
+    </body>
+</html>

@@ -16,17 +16,16 @@ class Settings(BaseSettings):
 
     # jwt
     authjwt_secret_key: str = Field("auth secret", env="AUTH_SECRET")
-    authjwt_denylist_enabled: bool = True
+    authjwt_denylist_enabled: bool = False
     authjwt_denylist_token_checks: set = {"access", "refresh"}
     authjwt_token_location: set = {"cookies"}
     authjwt_cookie_secure: bool = False
     authjwt_cookie_csrf_protect: bool = True
-    # время хранения токена в черном списке
-    access_expires: int = timedelta(minutes=15).total_seconds()
-    refresh_expires: int = timedelta(days=30).total_seconds()
     # время жизни токена
-    authjwt_access_token_expires: int = timedelta(minutes=15).total_seconds()
-    authjwt_refresh_token_expires: int = timedelta(days=30).total_seconds()
+    # authjwt_access_token_expires: int = timedelta(minutes=15).total_seconds()
+    # authjwt_refresh_token_expires: int = timedelta(days=30).total_seconds()
+    authjwt_access_token_expires: int = timedelta(minutes=1).total_seconds()
+    authjwt_refresh_token_expires: int = timedelta(minutes=2).total_seconds()
     # Change to 'lax' in production to make your website more secure from CSRF Attacks, default is None
     # authjwt_cookie_samesite: str = 'lax'
 
@@ -36,10 +35,11 @@ class Settings(BaseSettings):
         case_sensitive = True
 
 
-static = "http://127.0.0.1:1337/web/static"
-server = "http://127.0.0.1:1337/web"
+server = "http://127.0.0.1:1337"
+static = f"{server}/static"
+
 
 origins = [
-    "http://localhost",
-    "http://localhost:8000",
+    "http://localhost:1337",
+    "http://127.0.0.1:1337",
 ]

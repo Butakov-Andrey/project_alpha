@@ -8,7 +8,7 @@
         <link rel="stylesheet" href="{{ static }}/css/base.css">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/picnic">
         <!-- HTMX -->
-        <!-- <script src="https://unpkg.com/htmx.org@1.8.5" integrity="sha384-7aHh9lqPYGYZ7sTHvzP1t3BAfLhYSTy9ArHdP3Xsr9/3TlGurYgcPBoFmXX2TX/w" crossorigin="anonymous"></script> -->
+        <script src="https://unpkg.com/htmx.org@1.8.5" integrity="sha384-7aHh9lqPYGYZ7sTHvzP1t3BAfLhYSTy9ArHdP3Xsr9/3TlGurYgcPBoFmXX2TX/w" crossorigin="anonymous"></script>
         <!-- HTMX websockets -->
         <!-- <script src="https://unpkg.com/htmx.org/dist/ext/ws.js"></script> -->
     </head>
@@ -19,9 +19,16 @@
                 <span>Project Alpha</span>
             </a>
             <div class="menu">
-                <a href="#" class="pseudo button icon-picture">
-                    Log In
-                </a>
+                {% if user %}
+                    {{ user }}
+                    <a href="{{ server }}/auth/" class="pseudo button icon-picture">
+                        Log Out
+                    </a>
+                {% else %}
+                    <a href="{{ server }}/auth/" class="pseudo button icon-picture">
+                        Log In
+                    </a>
+                {% endif %}
             </div>
         </nav>
         <!-- main page -->

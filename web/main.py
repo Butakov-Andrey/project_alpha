@@ -1,14 +1,16 @@
-from app_auth.router import auth
-from app_cash.router import cash
+from app_auth.router import rout_auth
+from app_auth.updated_auth import UpdatedAuthJWT
+from app_cash.router import rout_cash
 from config import Settings, origins, server, static
-from fastapi import FastAPI, Request
+from exceptions import authjwt_exception_handler, custom_http_exception_handler
+from fastapi import Depends, FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi_jwt_auth import AuthJWT
 from fastapi_jwt_auth.exceptions import AuthJWTException
-from redis_db import redis_conn
+from starlette.exceptions import HTTPException
 
 app = FastAPI(
     title="Project Alpha",
@@ -21,17 +23,11 @@ app = FastAPI(
     docs_url="/docs",
     redoc_url=None,
     # prefix распространяется на все роуты и документацию
-    root_path="/web",
+    # root_path="/web",
 )
 
 # static
 app.mount("/static", StaticFiles(directory="static"), name="static")
-
-
-# templates
-templates = Jinja2Templates(directory="templates/")
-templates.env.globals["static"] = static
-templates.env.globals["server"] = server
 
 
 app.add_middleware(
@@ -43,30 +39,41 @@ app.add_middleware(
 )
 
 
+# templates
+def get_templates() -> Jinja2Templates:
+    templates = Jinja2Templates(directory="templates/")
+    templates.env.globals["static"] = static
+    templates.env.globals["server"] = server
+    return templates
+
+
 @AuthJWT.load_config
 def get_config() -> Settings:
     return Settings()
 
 
-@AuthJWT.token_in_denylist_loader
-def check_if_token_in_denylist(decrypted_token: dict) -> None | str:
-    """
-    Проверяем, есть ли token в черном списке
-    """
-    jti = decrypted_token["jti"]
-    entry = redis_conn.get(jti)
-    return entry and entry == "true"
-
-
-@app.exception_handler(AuthJWTException)
-def authjwt_exception_handler(request: Request, exc: AuthJWTException) -> JSONResponse:
-    return JSONResponse(status_code=exc.status_code, content={"detail": exc.message})
-
-
 @app.get("/", status_code=200, response_class=HTMLResponse)
-async def home(request: Request):
-    return templates.TemplateResponse("home.html", {"request": request})
+async def home(request: Request, Authorize: UpdatedAuthJWT = Depends()):
+    try:
+        Authorize.jwt_optional()
+    except AuthJWTException:
+        context = {"request": request}
+        response = get_templates().TemplateResponse(
+            "home.html",
+            context,
+        )
+        return response
+    current_user = Authorize.get_jwt_subject() or None
+    context = {"request": request, "user": current_user}
+    response = get_templates().TemplateResponse(
+        "home.html",
+        context,
+    )
+    return response
 
 
-app.include_router(auth)
-app.include_router(cash)
+app.add_exception_handler(AuthJWTException, authjwt_exception_handler)
+app.add_exception_handler(HTTPException, custom_http_exception_handler)
+
+app.include_router(rout_auth)
+app.include_router(rout_cash)

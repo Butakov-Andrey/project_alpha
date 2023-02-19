@@ -15,5 +15,6 @@ redis
 alembic
 # templates
 Jinja2
+python-multipart
 # jwt
 fastapi-jwt-auth
