@@ -6,13 +6,13 @@ from .schema import UserIn
 from .utils import hash_password
 
 
-def get_user_by_email(db: Session, email: str) -> User:
+def get_user_by_email(db: Session, email: str) -> User | None:
     return db.query(User).filter(User.email == email).first()
 
 
 def is_user_by_email_exist(db: Session, email: str) -> bool:
     subquery = select(User).filter(User.email == email).exists()
-    return db.query(subquery).scalar() is True
+    return db.query(subquery).scalar()
 
 
 def get_users(db: Session, skip: int = 0, limit: int = 10) -> list[User]:

@@ -2,7 +2,20 @@
 
 {% block title %}Cash{% endblock %}
 
+{% block htmx %}
+    <!-- HTMX -->
+    <script src="https://unpkg.com/htmx.org@1.8.5" integrity="sha384-7aHh9lqPYGYZ7sTHvzP1t3BAfLhYSTy9ArHdP3Xsr9/3TlGurYgcPBoFmXX2TX/w" crossorigin="anonymous"></script>
+    <!-- HTMX websockets -->
+    <script src="https://unpkg.com/htmx.org/dist/ext/ws.js"></script>
+{% endblock %}
+
 {% block content %}
     <h1>CashPage</h1>
     <p>{{ user }}</p>
+    <div hx-ext="ws" ws-connect="/ws/">
+        <form hx-trigger="click" ws-send>
+            <input type="hidden" name="cash" value="CAASH">
+            <button>Click Me!</button>
+        </form>
+    </div>
 {% endblock  %}

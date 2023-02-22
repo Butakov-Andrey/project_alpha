@@ -1,54 +1,35 @@
 import main
-from dependencies import get_db
+from constants import STATUS_CODE
+from dependencies import get_current_user_and_role_from_jwt, get_db
 from fastapi import APIRouter, Depends, Form, HTTPException, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
-from fastapi_jwt_auth.exceptions import AuthJWTException
 from sqlalchemy.orm import Session
 
 from .crud import create_user, get_user_by_email, get_users, is_user_by_email_exist
 from .models import User
 from .schema import UserIn, UserOut
 from .updated_auth import UpdatedAuthJWT
-from .utils import check_password, get_role_dict
+from .utils import check_password
 
 rout_auth = APIRouter(
     # prefix распространяется на этот роут
     prefix="/auth",
-    tags=["auth"],
-    responses={404: {"description": "Not found"}},
 )
 
 
-@rout_auth.get("/", status_code=200, response_class=HTMLResponse)
-async def auth(request: Request, Authorize: UpdatedAuthJWT = Depends()):
-    try:
-        Authorize.jwt_optional()
-    except AuthJWTException:
-        context = {"request": request}
-        response = main.get_templates().TemplateResponse(
-            "auth/account.html",
-            context,
-        )
-        return response
-    current_user = Authorize.get_jwt_subject() or None
-    context = {"request": request, "user": current_user}
-    response = main.get_templates().TemplateResponse(
-        "auth/account.html",
-        context,
-    )
+# external
+@rout_auth.get("/", status_code=STATUS_CODE.HTTP_200_OK, response_class=HTMLResponse)
+async def auth(
+    request: Request,
+    user_and_role=Depends(get_current_user_and_role_from_jwt),
+):
+    user, role = user_and_role
+    context = {"request": request, "user": user, "role": role}
+    response = main.get_templates().TemplateResponse("auth/account.html", context)
     return response
 
 
-@rout_auth.post("/register", response_model=UserOut)
-def register(user: UserIn, db: Session = Depends(get_db)) -> User:
-    db_user = get_user_by_email(db, email=user.email)
-    if db_user:
-        raise HTTPException(
-            status_code=400, detail=f"Email {user.email} already registered!"
-        )
-    return create_user(db=db, user=user)
-
-
+# internal
 @rout_auth.post("/login")
 async def login(
     request: Request,
@@ -61,15 +42,19 @@ async def login(
     Получаем fresh_access_token и refresh_token
     """
     if not is_user_by_email_exist(db, email=email):
-        context = {"request": request, "error": "Incorrect email or password"}
-        return main.get_templates().TemplateResponse("auth/account.html", context)
+        return main.get_templates().TemplateResponse(
+            "auth/account.html",
+            {"request": request, "error": "Incorrect email or password"},
+        )
 
     db_user = get_user_by_email(db, email=email)
-    if not check_password(password, db_user.hashed_password):
-        context = {"request": request, "error": "Incorrect email or password"}
-        return main.get_templates().TemplateResponse("auth/account.html", context)
+    if not db_user or not check_password(password, str(db_user.hashed_password)):
+        return main.get_templates().TemplateResponse(
+            "auth/account.html",
+            {"request": request, "error": "Incorrect email or password"},
+        )
 
-    role = get_role_dict(db_user.role)
+    role = {"role": db_user.role}
     response = RedirectResponse("/", status_code=303)
     access_token = Authorize.create_access_token(
         subject=email,
@@ -85,6 +70,25 @@ async def login(
     return response
 
 
+@rout_auth.post("/logout")
+async def logout(Authorize: UpdatedAuthJWT = Depends()) -> RedirectResponse:
+    Authorize.jwt_required()
+    response = RedirectResponse("/", status_code=303)
+    Authorize.unset_jwt_cookies(response)
+    return response
+
+
+# waiting...
+@rout_auth.post("/register", response_model=UserOut)
+def register(user: UserIn, db: Session = Depends(get_db)) -> User:
+    db_user = get_user_by_email(db, email=user.email)
+    if db_user:
+        raise HTTPException(
+            status_code=400, detail=f"Email {user.email} already registered!"
+        )
+    return create_user(db=db, user=user)
+
+
 @rout_auth.post("/refresh")
 def refresh(Authorize: UpdatedAuthJWT = Depends()) -> dict[str, str]:
     """
@@ -93,20 +97,13 @@ def refresh(Authorize: UpdatedAuthJWT = Depends()) -> dict[str, str]:
     """
     Authorize.jwt_refresh_token_required()
     current_user = Authorize.get_jwt_subject()
-    role = get_role_dict(Authorize.get_raw_jwt()["role"])
     new_access_token = Authorize.create_access_token(
-        subject=current_user, user_claims=role, fresh=False
+        subject=current_user,
+        user_claims={"role": Authorize.get_raw_jwt()["role"]},
+        fresh=False,
     )
     Authorize.set_access_cookies(new_access_token)
     return {"msg": "The token has been refresh"}
-
-
-@rout_auth.post("/logout")
-async def logout(Authorize: UpdatedAuthJWT = Depends()) -> RedirectResponse:
-    Authorize.jwt_required()
-    response = RedirectResponse("/", status_code=303)
-    Authorize.unset_jwt_cookies(response)
-    return response
 
 
 @rout_auth.get("/partially-protected")

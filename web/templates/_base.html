@@ -7,10 +7,8 @@
         <!-- http://127.0.0.1:1337/web/static/css/base.css -->
         <link rel="stylesheet" href="{{ static }}/css/base.css">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/picnic">
-        <!-- HTMX -->
-        <script src="https://unpkg.com/htmx.org@1.8.5" integrity="sha384-7aHh9lqPYGYZ7sTHvzP1t3BAfLhYSTy9ArHdP3Xsr9/3TlGurYgcPBoFmXX2TX/w" crossorigin="anonymous"></script>
-        <!-- HTMX websockets -->
-        <!-- <script src="https://unpkg.com/htmx.org/dist/ext/ws.js"></script> -->
+        {% block htmx %}
+        {% endblock %}
     </head>
     <body>
         <!-- navbar -->
@@ -21,6 +19,7 @@
             <div class="menu">
                 {% if user %}
                     {{ user }}
+                    {{ role }}
                     <a href="{{ server }}/auth/" class="pseudo button icon-picture">
                         Log Out
                     </a>

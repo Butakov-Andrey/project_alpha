@@ -1,4 +1,7 @@
+# local
 flake8
+mypy
+types-redis
 pre-commit
 python-dotenv
 # fastapi
@@ -6,6 +9,8 @@ fastapi
 uvicorn
 email-validator
 bcrypt
+# websockets
+websockets
 # postgres
 psycopg2-binary
 SQLAlchemy

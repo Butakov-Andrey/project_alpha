@@ -1,9 +1,16 @@
 import hmac
-from typing import Optional, Union
+from typing import Any, Callable, Optional, Union
 
-from fastapi import Request, WebSocket
+import main
+from fastapi import Depends, Request, Response, WebSocket
+from fastapi.responses import RedirectResponse
 from fastapi_jwt_auth import AuthJWT
-from fastapi_jwt_auth.exceptions import CSRFError, JWTDecodeError, MissingTokenError
+from fastapi_jwt_auth.exceptions import (
+    AuthJWTException,
+    CSRFError,
+    JWTDecodeError,
+    MissingTokenError,
+)
 
 
 class UpdatedAuthJWT(AuthJWT):
@@ -78,3 +85,60 @@ class UpdatedAuthJWT(AuthJWT):
                         status_code=401,
                         message="CSRF double submit tokens do not match",
                     )
+
+
+def auth_required(func: Callable) -> Callable:
+    async def wrapper(
+        request: Request, Authorize: UpdatedAuthJWT = Depends()
+    ) -> Response:
+        """
+        Декоратор проверяет access_token, если он не валидный,
+        пытается получить новый из refresh_token, если он тоже не валидный,
+        то отправляет на страницу авторизации
+        """
+        try:
+            Authorize.jwt_required()
+        except AuthJWTException:
+            try:
+                Authorize.jwt_refresh_token_required()
+                current_user = Authorize.get_jwt_subject()
+
+                new_access_token = Authorize.create_access_token(
+                    subject=current_user,
+                    user_claims={"role": Authorize.get_raw_jwt()["role"]},
+                    fresh=False,
+                )
+                response = await func(request, Authorize, new_access_token)
+                Authorize.set_access_cookies(new_access_token, response)
+                return response
+            except AuthJWTException:
+                response = RedirectResponse("/auth/", status_code=303)
+                return response
+        return await func(request, Authorize)
+
+    return wrapper
+
+
+async def auth_jwt_required(Authorize: UpdatedAuthJWT = Depends()):
+    try:
+        Authorize.jwt_required()
+        user = Authorize.get_jwt_subject()
+        role = Authorize.get_raw_jwt()["role"]
+    except AuthJWTException:
+        try:
+            context: dict[str, Any] = dict()
+            Authorize.jwt_refresh_token_required()
+            user = Authorize.get_jwt_subject()
+            role = Authorize.get_raw_jwt()["role"]
+            new_access_token = Authorize.create_access_token(
+                subject=user,
+                user_claims={"role": role},
+                fresh=False,
+            )
+            response = main.get_templates().TemplateResponse("cash/base.html", context)
+            Authorize.set_access_cookies(new_access_token, response)
+            return response
+        except AuthJWTException:
+            response = RedirectResponse("/auth/", status_code=303)
+            return response
+    return user, role

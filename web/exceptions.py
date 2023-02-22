@@ -1,22 +1,22 @@
 import main
+from constants import STATUS_CODE
 from fastapi import Request
-from fastapi.exception_handlers import http_exception_handler
-from fastapi_jwt_auth.exceptions import AuthJWTException
+from fastapi.responses import RedirectResponse, Response
 from starlette.exceptions import HTTPException
 
 
-async def authjwt_exception_handler(request: Request, exc: AuthJWTException):
-    return main.get_templates().TemplateResponse(
-        "401.html",
-        {"request": request, "error": exc.message, "status_code": exc.status_code},
-    )
+async def authjwt_exception_handler() -> RedirectResponse:
+    response = RedirectResponse("/auth/", status_code=STATUS_CODE.HTTP_303_SEE_OTHER)
+    return response
 
 
-async def custom_http_exception_handler(request: Request, exc: HTTPException):
-    if exc.status_code == 404:
+async def custom_http_exception_handler(
+    request: Request, exc: HTTPException
+) -> Response:
+    if exc.status_code == STATUS_CODE.HTTP_404_NOT_FOUND:
         return main.get_templates().TemplateResponse(
-            "404.html",
+            "_exceptions/404.html",
             {"request": request, "error": exc.detail, "status_code": exc.status_code},
         )
     else:
-        return await http_exception_handler(request, exc)
+        raise exc

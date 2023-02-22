@@ -1,7 +1,8 @@
 from app_auth.router import rout_auth
-from app_auth.updated_auth import UpdatedAuthJWT
 from app_cash.router import rout_cash
-from config import Settings, origins, server, static
+from config import Settings, settings
+from constants import STATUS_CODE
+from dependencies import get_current_user_and_role_from_jwt
 from exceptions import authjwt_exception_handler, custom_http_exception_handler
 from fastapi import Depends, FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -11,6 +12,7 @@ from fastapi.templating import Jinja2Templates
 from fastapi_jwt_auth import AuthJWT
 from fastapi_jwt_auth.exceptions import AuthJWTException
 from starlette.exceptions import HTTPException
+from starlette.templating import _TemplateResponse
 
 app = FastAPI(
     title="Project Alpha",
@@ -22,17 +24,20 @@ app = FastAPI(
     openapi_url="/openapi.json",
     docs_url="/docs",
     redoc_url=None,
-    # prefix распространяется на все роуты и документацию
-    # root_path="/web",
 )
 
+# templates
+templates = Jinja2Templates(directory="templates/")
+templates.env.globals["static"] = settings.STATIC_URL
+templates.env.globals["server"] = settings.SERVER_URL
+
 # static
-app.mount("/static", StaticFiles(directory="static"), name="static")
+app.mount("/static", StaticFiles(directory="static"))
 
-
+# middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -41,39 +46,33 @@ app.add_middleware(
 
 # templates
 def get_templates() -> Jinja2Templates:
-    templates = Jinja2Templates(directory="templates/")
-    templates.env.globals["static"] = static
-    templates.env.globals["server"] = server
     return templates
 
 
+# authJWT
 @AuthJWT.load_config
 def get_config() -> Settings:
-    return Settings()
+    return settings
 
 
-@app.get("/", status_code=200, response_class=HTMLResponse)
-async def home(request: Request, Authorize: UpdatedAuthJWT = Depends()):
-    try:
-        Authorize.jwt_optional()
-    except AuthJWTException:
-        context = {"request": request}
-        response = get_templates().TemplateResponse(
-            "home.html",
-            context,
-        )
-        return response
-    current_user = Authorize.get_jwt_subject() or None
-    context = {"request": request, "user": current_user}
-    response = get_templates().TemplateResponse(
-        "home.html",
-        context,
-    )
+# home
+@app.get("/", status_code=STATUS_CODE.HTTP_200_OK, response_class=HTMLResponse)
+async def home(
+    request: Request,
+    user_and_role: tuple[str | None, str | None] = Depends(
+        get_current_user_and_role_from_jwt
+    ),
+) -> _TemplateResponse:
+    user, role = user_and_role
+    context = {"request": request, "user": user, "role": role}
+    response = get_templates().TemplateResponse("home.html", context)
     return response
 
 
+# Exception Handlers
 app.add_exception_handler(AuthJWTException, authjwt_exception_handler)
 app.add_exception_handler(HTTPException, custom_http_exception_handler)
 
+# Routers
 app.include_router(rout_auth)
 app.include_router(rout_cash)

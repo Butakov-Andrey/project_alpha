@@ -22,12 +22,13 @@ class Settings(BaseSettings):
     authjwt_cookie_secure: bool = False
     authjwt_cookie_csrf_protect: bool = True
     # время жизни токена
-    # authjwt_access_token_expires: int = timedelta(minutes=15).total_seconds()
-    # authjwt_refresh_token_expires: int = timedelta(days=30).total_seconds()
-    authjwt_access_token_expires: int = timedelta(minutes=1).total_seconds()
-    authjwt_refresh_token_expires: int = timedelta(minutes=2).total_seconds()
-    # Change to 'lax' in production to make your website more secure from CSRF Attacks, default is None
-    # authjwt_cookie_samesite: str = 'lax'
+    authjwt_access_token_expires: float = timedelta(minutes=15).total_seconds()
+    authjwt_refresh_token_expires: float = timedelta(days=30).total_seconds()
+
+    # deploy
+    SERVER_URL: str = "http://127.0.0.1:1337"
+    STATIC_URL: str = f"{SERVER_URL}/static"
+    ORIGINS: list[str] = [SERVER_URL]
 
     class Config:
         env_file = ".env"
@@ -35,11 +36,4 @@ class Settings(BaseSettings):
         case_sensitive = True
 
 
-server = "http://127.0.0.1:1337"
-static = f"{server}/static"
-
-
-origins = [
-    "http://localhost:1337",
-    "http://127.0.0.1:1337",
-]
+settings = Settings()
