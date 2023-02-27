@@ -1,7 +1,6 @@
 from app_auth.router import rout_auth
 from app_cash.router import rout_cash
-from config import Settings, settings
-from constants import STATUS_CODE
+from config import STATUS_CODE, Settings, settings
 from dependencies import get_current_user_and_role_from_jwt
 from exceptions import authjwt_exception_handler, custom_http_exception_handler
 from fastapi import Depends, FastAPI, Request
@@ -64,7 +63,11 @@ async def home(
     ),
 ) -> _TemplateResponse:
     user, role = user_and_role
-    context = {"request": request, "user": user, "role": role}
+    context = {
+        settings.REQUEST_FIELD: request,
+        settings.USER_FIELD: user,
+        settings.ROLE_FIELD: role,
+    }
     response = get_templates().TemplateResponse("home.html", context)
     return response
 

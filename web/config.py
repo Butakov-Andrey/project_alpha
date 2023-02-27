@@ -21,9 +21,20 @@ class Settings(BaseSettings):
     authjwt_token_location: set = {"cookies"}
     authjwt_cookie_secure: bool = False
     authjwt_cookie_csrf_protect: bool = True
+    # cookies
+    CSRF_REFRESH_TOKEN: str = "csrf_refresh_token"
     # время жизни токена
-    authjwt_access_token_expires: float = timedelta(minutes=15).total_seconds()
-    authjwt_refresh_token_expires: float = timedelta(days=30).total_seconds()
+    # authjwt_access_token_expires: float = timedelta(minutes=15).total_seconds()
+    # authjwt_refresh_token_expires: float = timedelta(days=30).total_seconds()
+    authjwt_access_token_expires: float = timedelta(minutes=1).total_seconds()
+    authjwt_refresh_token_expires: float = timedelta(minutes=2).total_seconds()
+
+    # fields
+    ROLE_FIELD: str = "role"
+    USER_FIELD: str = "user"
+    REQUEST_FIELD: str = "request"
+    ERROR_FIELD: str = "error"
+    STATUS_CODE_FIELD: str = "status_code"
 
     # deploy
     SERVER_URL: str = "http://127.0.0.1:1337"
@@ -37,3 +48,15 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
+
+
+class STATUS_CODE:
+    HTTP_200_OK = 200
+    HTTP_303_SEE_OTHER = 303
+    HTTP_404_NOT_FOUND = 404
+
+
+class RESPONSE_MESSAGE:
+    VALID_TOKEN = "Token is valid. Successfully login."
+    INVALID_TOKEN = "Token is invalid."
+    INCORRECT_CREDENTIALS = "Incorrect email or password."

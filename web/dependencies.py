@@ -1,4 +1,5 @@
 from app_auth.updated_auth import UpdatedAuthJWT
+from config import settings
 from fastapi import Depends
 from fastapi_jwt_auth.exceptions import AuthJWTException
 from postgres_db import SessionLocal
@@ -27,5 +28,5 @@ async def get_current_user_and_role_from_jwt(
         except AuthJWTException:
             return user, role
     user = Authorize.get_jwt_subject()
-    role = Authorize.get_raw_jwt()["role"]
+    role = Authorize.get_raw_jwt()[settings.ROLE_FIELD]
     return user, role

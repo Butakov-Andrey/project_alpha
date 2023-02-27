@@ -37,3 +37,5 @@ $ docker-compose exec web alembic revision --autogenerate -m "Testing table"
 ```
 $ docker-compose exec web alembic upgrade head
 ```
+
+docker-compose exec web coverage report -m 

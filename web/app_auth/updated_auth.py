@@ -1,8 +1,8 @@
 import hmac
-from typing import Any, Callable, Optional, Union
+from typing import Callable, Optional, Union
 
-import main
-from fastapi import Depends, Request, Response, WebSocket
+from config import RESPONSE_MESSAGE, settings
+from fastapi import Depends, Request, Response, WebSocket, WebSocketDisconnect
 from fastapi.responses import RedirectResponse
 from fastapi_jwt_auth import AuthJWT
 from fastapi_jwt_auth.exceptions import (
@@ -101,11 +101,15 @@ def auth_required(func: Callable) -> Callable:
         except AuthJWTException:
             try:
                 Authorize.jwt_refresh_token_required()
-                current_user = Authorize.get_jwt_subject()
+                user = Authorize.get_jwt_subject()
 
                 new_access_token = Authorize.create_access_token(
-                    subject=current_user,
-                    user_claims={"role": Authorize.get_raw_jwt()["role"]},
+                    subject=user,
+                    user_claims={
+                        settings.ROLE_FIELD: Authorize.get_raw_jwt()[
+                            settings.ROLE_FIELD
+                        ]
+                    },
                     fresh=False,
                 )
                 response = await func(request, Authorize, new_access_token)
@@ -119,26 +123,29 @@ def auth_required(func: Callable) -> Callable:
     return wrapper
 
 
-async def auth_jwt_required(Authorize: UpdatedAuthJWT = Depends()):
-    try:
-        Authorize.jwt_required()
-        user = Authorize.get_jwt_subject()
-        role = Authorize.get_raw_jwt()["role"]
-    except AuthJWTException:
+def ws_auth_required(func: Callable) -> Callable:
+    async def wrapper(
+        self,
+        websocket: WebSocket,
+        Authorize: UpdatedAuthJWT = Depends(),
+        data: str = RESPONSE_MESSAGE.VALID_TOKEN,
+    ):
+        """
+        Декоратор проверяет валидность csrf_refresh_token
+        при подключении и отправке сообщений в websockets
+        """
+        result = await func(self, websocket, Authorize, data)
+
         try:
-            context: dict[str, Any] = dict()
-            Authorize.jwt_refresh_token_required()
-            user = Authorize.get_jwt_subject()
-            role = Authorize.get_raw_jwt()["role"]
-            new_access_token = Authorize.create_access_token(
-                subject=user,
-                user_claims={"role": role},
-                fresh=False,
+            csrf_token = websocket.cookies.get(settings.CSRF_REFRESH_TOKEN)
+            Authorize.jwt_refresh_token_required(
+                "websocket", websocket=websocket, csrf_token=csrf_token
             )
-            response = main.get_templates().TemplateResponse("cash/base.html", context)
-            Authorize.set_access_cookies(new_access_token, response)
-            return response
+            await websocket.send_text(data)
         except AuthJWTException:
-            response = RedirectResponse("/auth/", status_code=303)
-            return response
-    return user, role
+            await websocket.send_text(RESPONSE_MESSAGE.INVALID_TOKEN)
+            raise WebSocketDisconnect
+
+        return result
+
+    return wrapper

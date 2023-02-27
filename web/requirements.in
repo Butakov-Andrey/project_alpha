@@ -4,13 +4,25 @@ mypy
 types-redis
 pre-commit
 python-dotenv
+
 # fastapi
 fastapi
 uvicorn
 email-validator
 bcrypt
+# jwt
+fastapi-jwt-auth
 # websockets
 websockets
+
+# tests
+pytest
+coverage
+
+# templates
+Jinja2
+python-multipart
+
 # postgres
 psycopg2-binary
 SQLAlchemy
@@ -18,8 +30,3 @@ SQLAlchemy
 redis
 # migrations
 alembic
-# templates
-Jinja2
-python-multipart
-# jwt
-fastapi-jwt-auth

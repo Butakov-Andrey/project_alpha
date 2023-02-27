@@ -1,5 +1,5 @@
 import main
-from constants import STATUS_CODE
+from config import STATUS_CODE, settings
 from fastapi import Request
 from fastapi.responses import RedirectResponse, Response
 from starlette.exceptions import HTTPException
@@ -16,7 +16,11 @@ async def custom_http_exception_handler(
     if exc.status_code == STATUS_CODE.HTTP_404_NOT_FOUND:
         return main.get_templates().TemplateResponse(
             "_exceptions/404.html",
-            {"request": request, "error": exc.detail, "status_code": exc.status_code},
+            {
+                settings.REQUEST_FIELD: request,
+                settings.ERROR_FIELD: exc.detail,
+                settings.STATUS_CODE_FIELD: exc.status_code,
+            },
         )
     else:
         raise exc
