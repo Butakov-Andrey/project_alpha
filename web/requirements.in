@@ -18,6 +18,9 @@ websockets
 # tests
 pytest
 coverage
+httpx
+trio
+pytest-asyncio
 
 # templates
 Jinja2

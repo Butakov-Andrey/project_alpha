@@ -1,7 +1,6 @@
 from config import settings
 from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import declarative_base, sessionmaker
 
 PG_USER = settings.POSTGRES_USER
 PG_PASSWORD = settings.POSTGRES_PASSWORD

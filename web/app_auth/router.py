@@ -1,5 +1,5 @@
 import main
-from config import STATUS_CODE, settings
+from config import RESPONSE_MESSAGE, STATUS_CODE, settings
 from dependencies import get_current_user_and_role_from_jwt, get_db
 from fastapi import APIRouter, Depends, Form, HTTPException, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
@@ -35,14 +35,14 @@ async def auth(
 
 
 # internal
-@rout_auth.post("/login")
+@rout_auth.post("/login", response_class=HTMLResponse)
 async def login(
     request: Request,
     Authorize: UpdatedAuthJWT = Depends(),
     db: Session = Depends(get_db),
     email: str = Form(...),
     password: str = Form(...),
-) -> RedirectResponse:
+):
     """
     Получаем fresh_access_token и refresh_token
     """
@@ -51,7 +51,7 @@ async def login(
             "auth/account.html",
             {
                 settings.REQUEST_FIELD: request,
-                settings.ERROR_FIELD: settings.INCORRECT_CREDENTIALS,
+                settings.ERROR_FIELD: RESPONSE_MESSAGE.INCORRECT_CREDENTIALS,
             },
         )
 
@@ -61,7 +61,7 @@ async def login(
             "auth/account.html",
             {
                 settings.REQUEST_FIELD: request,
-                settings.ERROR_FIELD: settings.INCORRECT_CREDENTIALS,
+                settings.ERROR_FIELD: RESPONSE_MESSAGE.INCORRECT_CREDENTIALS,
             },
         )
 
@@ -81,8 +81,8 @@ async def login(
     return response
 
 
-@rout_auth.post("/logout")
-async def logout(Authorize: UpdatedAuthJWT = Depends()) -> RedirectResponse:
+@rout_auth.post("/logout", response_class=HTMLResponse)
+async def logout(Authorize: UpdatedAuthJWT = Depends()):
     response = RedirectResponse("/", status_code=303)
     try:
         Authorize.jwt_required()

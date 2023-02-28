@@ -1,7 +1,10 @@
 **/.env
 **/.ssh
 *.log
+.coverage
+test.db
 
 env/
 .vscode/
 __pycache__/
+.pytest_cache/
