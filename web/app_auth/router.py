@@ -44,7 +44,7 @@ async def login(
     password: str = Form(...),
 ):
     """
-    Получаем fresh_access_token и refresh_token
+    Получаем access_token и refresh_token
     """
     if not is_user_by_email_exist(db, email=email):
         return main.get_templates().TemplateResponse(
