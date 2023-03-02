@@ -14,7 +14,7 @@ async def custom_http_exception_handler(
     request: Request, exc: HTTPException
 ) -> Response:
     if exc.status_code == STATUS_CODE.HTTP_404_NOT_FOUND:
-        return main.get_templates().TemplateResponse(
+        return main.templates.TemplateResponse(
             "_exceptions/404.html",
             {
                 settings.REQUEST_FIELD: request,

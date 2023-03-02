@@ -1,5 +1,4 @@
 import pytest
-from app_auth import models
 
 
 class TestMain:

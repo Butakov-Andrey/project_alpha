@@ -1,15 +1,13 @@
 from app_auth.router import rout_auth
+from app_auth.utils import jwt_auth
 from app_cash.router import rout_cash
-from config import STATUS_CODE, Settings, settings
-from dependencies import get_current_user_and_role_from_jwt
-from exceptions import authjwt_exception_handler, custom_http_exception_handler
-from fastapi import Depends, FastAPI, Request
+from config import STATUS_CODE, settings
+from exceptions import custom_http_exception_handler
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from fastapi_jwt_auth import AuthJWT
-from fastapi_jwt_auth.exceptions import AuthJWTException
 from starlette.exceptions import HTTPException
 from starlette.templating import _TemplateResponse
 
@@ -43,39 +41,24 @@ app.add_middleware(
 )
 
 
-# templates
-def get_templates() -> Jinja2Templates:
-    return templates
-
-
-# authJWT
-@AuthJWT.load_config
-def get_config() -> Settings:
-    return settings
-
-
 # home
 @app.get("/", status_code=STATUS_CODE.HTTP_200_OK, response_class=HTMLResponse)
+@jwt_auth.auth_optional
 async def home(
     request: Request,
-    user_and_role: tuple[str | None, str | None] = Depends(
-        get_current_user_and_role_from_jwt
-    ),
+    user: str | None,
 ) -> _TemplateResponse:
-    user, role = user_and_role
     context = {
         settings.REQUEST_FIELD: request,
         settings.USER_FIELD: user,
-        settings.ROLE_FIELD: role,
     }
-    response = get_templates().TemplateResponse("home.html", context)
+    response = templates.TemplateResponse("home.html", context)
     return response
 
 
-# Exception Handlers
-app.add_exception_handler(AuthJWTException, authjwt_exception_handler)
+# exception Handlers
 app.add_exception_handler(HTTPException, custom_http_exception_handler)
 
-# Routers
+# routers
 app.include_router(rout_auth)
 app.include_router(rout_cash)

@@ -11,7 +11,7 @@ uvicorn
 email-validator
 bcrypt
 # jwt
-fastapi-jwt-auth
+PyJWT
 # websockets
 websockets
 

@@ -38,6 +38,10 @@ $ docker-compose exec web alembic revision --autogenerate -m "Testing table"
 $ docker-compose exec web alembic upgrade head
 ```
 
+## TODO:
+id поменять на uuid
+
+## Notes:
 
 docker-compose exec web coverage report -m 
 
