@@ -1,5 +1,5 @@
 import main
-from config import RESPONSE_MESSAGE, settings
+from config import RESPONSE_MESSAGE, TEMPLATE_FIELDS, settings
 from dependencies import get_db
 from fastapi import APIRouter, Depends, Form, HTTPException, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
@@ -18,8 +18,8 @@ rout_auth = APIRouter(
 @jwt_auth.auth_optional
 async def account(request: Request, user: str | None):
     context = {
-        settings.REQUEST_FIELD: request,
-        settings.USER_FIELD: user,
+        TEMPLATE_FIELDS.REQUEST: request,
+        TEMPLATE_FIELDS.USER: user,
     }
     response = main.templates.TemplateResponse("auth/account.html", context)
     return response

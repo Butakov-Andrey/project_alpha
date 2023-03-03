@@ -1,7 +1,7 @@
 from app_auth.router import rout_auth
 from app_auth.utils import jwt_auth
 from app_cash.router import rout_cash
-from config import settings
+from config import TEMPLATE_FIELDS, settings
 from exceptions import custom_http_exception_handler, custom_ws_exception_handler
 from fastapi import FastAPI, Request, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
@@ -46,8 +46,8 @@ app.add_middleware(
 @jwt_auth.auth_optional
 async def home(request: Request, user: str | None) -> _TemplateResponse:
     context = {
-        settings.REQUEST_FIELD: request,
-        settings.USER_FIELD: user,
+        TEMPLATE_FIELDS.REQUEST: request,
+        TEMPLATE_FIELDS.USER: user,
     }
     response = templates.TemplateResponse("home.html", context)
     return response

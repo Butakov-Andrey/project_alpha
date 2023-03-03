@@ -54,32 +54,22 @@ class JWTHandler:
             access_token = request.cookies.get("access_token")
             refresh_token = request.cookies.get("refresh_token")
             if not (access_token and refresh_token):
-                print("Tokens not found in cookies")
                 return await func(request, user=None)
-
             try:
-                print("Check access token...")
                 payload = jwt.decode(
                     access_token,
                     settings.JWT_SECRET_KEY,
                     algorithms=[settings.ALGORITHM],
                 )
-                print("Access token is valid")
             except InvalidTokenError:
-                print("Access token is expired or not valid")
                 try:
-                    print("Check refresh token...")
                     payload = jwt.decode(
                         refresh_token,
                         settings.JWT_REFRESH_SECRET_KEY,
                         algorithms=[settings.ALGORITHM],
                     )
-                    print("Refresh token is valid")
                 except InvalidTokenError:
-                    print("Refresh token is expired or not valid")
                     return await func(request, user=None)
-
-            print(f"Tokens are valid. User is {payload.get('sub')}")
             return await func(request, user=payload.get("sub"))
 
         return wrapper
@@ -89,32 +79,22 @@ class JWTHandler:
             access_token = request.cookies.get("access_token")
             refresh_token = request.cookies.get("refresh_token")
             if not (access_token and refresh_token):
-                print("Tokens not found in cookies")
-                raise HTTPException(
-                    status_code=401,
-                    detail=RESPONSE_MESSAGE.NO_TOKENS,
-                )
-
+                raise HTTPException(status_code=401, detail=RESPONSE_MESSAGE.NO_TOKENS)
             try:
-                print("Check access token...")
                 payload = jwt.decode(
                     access_token,
                     settings.JWT_SECRET_KEY,
                     algorithms=[settings.ALGORITHM],
                 )
                 response = await func(request, user=payload.get("sub"))
-                print("Access token is valid")
             except InvalidTokenError:
-                print("Access token is expired or not valid")
                 try:
-                    print("Check refresh token...")
                     payload = jwt.decode(
                         refresh_token,
                         settings.JWT_REFRESH_SECRET_KEY,
                         algorithms=[settings.ALGORITHM],
                     )
                     response = await func(request, user=payload.get("sub"))
-                    print("Create new access token...")
                     new_access_token = self.create_access_token(
                         subject=payload.get("sub")
                     )
@@ -125,70 +105,38 @@ class JWTHandler:
                         expires=settings.COOKIE_EXPIRE_SECONDS,
                         httponly=True,
                     )
-                    print("Refresh token is valid")
                 except InvalidTokenError:
-                    print("Refresh token is expired or not valid")
                     raise HTTPException(
-                        status_code=401,
-                        detail=RESPONSE_MESSAGE.INVALID_TOKENS,
+                        status_code=401, detail=RESPONSE_MESSAGE.INVALID_TOKENS
                     )
-            print(f"Tokens are valid. User is {payload.get('sub')}")
             return response
 
         return wrapper
 
-    # TODO
     def ws_auth_required(self, func: Callable) -> Callable:
-        async def wrapper(self, websocket: WebSocket):
-            response = await func(self, websocket)
-
-            # eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2Nzc4MjQyOTksInN1YiI6ImFkbWluQGV4YW1wbGUuY29tIn0.FWt4wdQ0kyp-dPeL_yV3sIgH9oHKaO0jz4_K9BiEVsA
+        async def wrapper(self, websocket: WebSocket, data: str = "mes"):
+            response = await func(self, websocket, data)
             access_token = websocket.cookies.get("access_token")
             refresh_token = websocket.cookies.get("refresh_token")
             if not (access_token and refresh_token):
-                raise WebSocketDisconnect(
-                    code=1008,
-                    reason=RESPONSE_MESSAGE.NO_TOKENS,
+                raise WebSocketDisconnect(code=1008, reason=RESPONSE_MESSAGE.NO_TOKENS)
+            try:
+                jwt.decode(
+                    access_token,
+                    settings.JWT_SECRET_KEY,
+                    algorithms=[settings.ALGORITHM],
                 )
-
-            # try:
-            #     print("Check access token...")
-            #     payload = jwt.decode(
-            #         access_token,
-            #         settings.JWT_SECRET_KEY,
-            #         algorithms=[settings.ALGORITHM],
-            #     )
-            #     response = await func(websocket, user=payload.get("sub"))
-            #     print("Access token is valid")
-            # except InvalidTokenError:
-            #     print("Access token is expired or not valid")
-            #     try:
-            #         print("Check refresh token...")
-            #         payload = jwt.decode(
-            #             refresh_token,
-            #             settings.JWT_REFRESH_SECRET_KEY,
-            #             algorithms=[settings.ALGORITHM],
-            #         )
-            #         response = await func(websocket, user=payload.get("sub"))
-            #         print("Create new access token...")
-            #         new_access_token = self.create_access_token(
-            #             subject=payload.get("sub")
-            #         )
-            #         response.set_cookie(
-            #             key="access_token",
-            #             value=new_access_token,
-            #             max_age=settings.COOKIE_EXPIRE_SECONDS,
-            #             expires=settings.COOKIE_EXPIRE_SECONDS,
-            #             httponly=True,
-            #         )
-            #         print("Refresh token is valid")
-            #     except InvalidTokenError:
-            #         print("Refresh token is expired or not valid")
-            #         raise HTTPException(
-            #             status_code=401,
-            #             detail=RESPONSE_MESSAGE.INVALID_TOKENS,
-            #         )
-            # print(f"Tokens are valid. User is {payload.get('sub')}")
+            except InvalidTokenError:
+                try:
+                    jwt.decode(
+                        refresh_token,
+                        settings.JWT_REFRESH_SECRET_KEY,
+                        algorithms=[settings.ALGORITHM],
+                    )
+                except InvalidTokenError:
+                    raise WebSocketDisconnect(
+                        code=1008, reason=RESPONSE_MESSAGE.INVALID_TOKENS
+                    )
             return response
 
         return wrapper

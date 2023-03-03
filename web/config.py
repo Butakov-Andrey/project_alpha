@@ -17,17 +17,12 @@ class Settings(BaseSettings):
     JWT_SECRET_KEY: str
     JWT_REFRESH_SECRET_KEY: str
     # время жизни jwt токенов
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
-    REFRESH_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 7
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 1  # 30
+    REFRESH_TOKEN_EXPIRE_MINUTES: int = 2  # 60 * 24 * 7
     # время жизни cookie с jwt токенами
-    COOKIE_EXPIRE_SECONDS: int = REFRESH_TOKEN_EXPIRE_MINUTES * 60
-
-    # fields
-    ROLE_FIELD: str = "role"
-    USER_FIELD: str = "user"
-    REQUEST_FIELD: str = "request"
-    ERROR_FIELD: str = "error"
-    STATUS_CODE_FIELD: str = "status_code"
+    COOKIE_EXPIRE_SECONDS: int = 60 * 60 * 24 * 7  # REFRESH_TOKEN_EXPIRE_MINUTES * 60
+    # timeout websocket подключения при бездействии
+    WS_CONNECTION_TIMEOUT_SECONDS: int = 30 * 60  # ACCESS_TOKEN_EXPIRE_MINUTES * 60
 
     # deploy
     SERVER_URL: str = "http://127.0.0.1:1337"
@@ -44,6 +39,13 @@ settings = Settings()
 
 
 class RESPONSE_MESSAGE:
-    INCORRECT_CREDENTIALS = "Incorrect email or password!"
-    NO_TOKENS = "No tokens detected!"
-    INVALID_TOKENS = "Invalid credentials! Please log in."
+    INCORRECT_CREDENTIALS: str = "Incorrect email or password!"
+    NO_TOKENS: str = "No tokens detected!"
+    INVALID_TOKENS: str = "Invalid tokens!"
+
+
+class TEMPLATE_FIELDS:
+    USER: str = "user"
+    REQUEST: str = "request"
+    ERROR: str = "error"
+    STATUS_CODE: str = "status_code"

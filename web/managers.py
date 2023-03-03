@@ -4,10 +4,11 @@ from fastapi import WebSocket
 
 class WebsocketConnectionManager:
     @jwt_auth.ws_auth_required
-    async def connect(self, websocket: WebSocket):
+    async def connect(self, websocket: WebSocket, data: str):
         await websocket.accept()
 
-    async def receive(self, websocket: WebSocket, data: str = "Default data"):
+    @jwt_auth.ws_auth_required
+    async def receive(self, websocket: WebSocket, data: str):
         await websocket.send_text(data)
 
     async def disconnect(self, websocket: WebSocket):
