@@ -1,33 +1,26 @@
-from datetime import timedelta
-
-from pydantic import BaseSettings, Field
+from pydantic import BaseSettings
 
 
 class Settings(BaseSettings):
-    # db
-    POSTGRES_USER: str = Field("pg user name", env="POSTGRES_USER")
-    POSTGRES_PASSWORD: str = Field("pg user password", env="POSTGRES_PASSWORD")
-    POSTGRES_DB: str = Field("database name", env="POSTGRES_DB")
-    POSTGRES_HOST: str = Field("pg container name", env="POSTGRES_HOST")
+    # postgres
+    POSTGRES_USER: str
+    POSTGRES_PASSWORD: str
+    POSTGRES_DB: str
+    POSTGRES_HOST: str
 
-    # redis - для хранения черного списка токенов
-    REDIS_HOST: str = Field("redis container name", env="REDIS_HOST")
-    REDIS_PORT: str = Field("redis port", env="REDIS_PORT")
+    # redis
+    REDIS_HOST: str
+    REDIS_PORT: str
 
     # jwt
-    authjwt_secret_key: str = Field("auth secret", env="AUTH_SECRET")
-    authjwt_denylist_enabled: bool = False
-    authjwt_denylist_token_checks: set = {"access", "refresh"}
-    authjwt_token_location: set = {"cookies"}
-    authjwt_cookie_secure: bool = False
-    authjwt_cookie_csrf_protect: bool = True
-    # cookies
-    CSRF_REFRESH_TOKEN: str = "csrf_refresh_token"
-    # время жизни токена
-    # authjwt_access_token_expires: float = timedelta(minutes=15).total_seconds()
-    # authjwt_refresh_token_expires: float = timedelta(days=30).total_seconds()
-    authjwt_access_token_expires: float = timedelta(minutes=1).total_seconds()
-    authjwt_refresh_token_expires: float = timedelta(minutes=2).total_seconds()
+    ALGORITHM: str = "HS256"
+    JWT_SECRET_KEY: str
+    JWT_REFRESH_SECRET_KEY: str
+    # время жизни jwt токенов
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
+    REFRESH_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 7
+    # время жизни cookie с jwt токенами
+    COOKIE_EXPIRE_SECONDS: int = REFRESH_TOKEN_EXPIRE_MINUTES * 60
 
     # fields
     ROLE_FIELD: str = "role"
@@ -50,13 +43,7 @@ class Settings(BaseSettings):
 settings = Settings()
 
 
-class STATUS_CODE:
-    HTTP_200_OK = 200
-    HTTP_303_SEE_OTHER = 303
-    HTTP_404_NOT_FOUND = 404
-
-
 class RESPONSE_MESSAGE:
-    VALID_TOKEN = "Token is valid. Successfully login."
-    INVALID_TOKEN = "Token is invalid."
-    INCORRECT_CREDENTIALS = "Incorrect email or password."
+    INCORRECT_CREDENTIALS = "Incorrect email or password!"
+    NO_TOKENS = "No tokens detected!"
+    INVALID_TOKENS = "Invalid credentials! Please log in."

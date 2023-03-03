@@ -3,11 +3,12 @@ from typing import Any, Callable
 
 import bcrypt
 import jwt
-from fastapi import Request
-from jwt.exceptions import ExpiredSignatureError, InvalidTokenError
+from config import RESPONSE_MESSAGE, settings
+from fastapi import HTTPException, Request, WebSocket, WebSocketDisconnect
+from jwt.exceptions import InvalidTokenError
 
 
-class PasswordHandler:
+class AuthHandler:
     def hash_password(self, password: str) -> str:
         encoded_password_hash = bcrypt.hashpw(password.encode(), bcrypt.gensalt())
         password_hash = encoded_password_hash.decode()
@@ -18,15 +19,6 @@ class PasswordHandler:
 
 
 class JWTHandler:
-    def __init__(self):
-        # self.ACCESS_TOKEN_EXPIRE_MINUTES = 30
-        # self.REFRESH_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7
-        self.ACCESS_TOKEN_EXPIRE_MINUTES = 1
-        self.REFRESH_TOKEN_EXPIRE_MINUTES = 2
-        self.ALGORITHM = "HS256"
-        self.JWT_SECRET_KEY = "secret"
-        self.JWT_REFRESH_SECRET_KEY = "refresh_secret"
-
     def create_access_token(
         self, subject: str | Any, expires_delta: timedelta | None = None
     ) -> str:
@@ -34,11 +26,11 @@ class JWTHandler:
             expire = datetime.utcnow() + expires_delta
         else:
             expire = datetime.utcnow() + timedelta(
-                minutes=self.ACCESS_TOKEN_EXPIRE_MINUTES
+                minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES
             )
 
         to_encode = {"exp": expire, "sub": str(subject)}
-        encoded_jwt = jwt.encode(to_encode, self.JWT_SECRET_KEY, self.ALGORITHM)
+        encoded_jwt = jwt.encode(to_encode, settings.JWT_SECRET_KEY, settings.ALGORITHM)
         return encoded_jwt
 
     def create_refresh_token(
@@ -48,11 +40,13 @@ class JWTHandler:
             expire = datetime.utcnow() + expires_delta
         else:
             expire = datetime.utcnow() + timedelta(
-                minutes=self.REFRESH_TOKEN_EXPIRE_MINUTES
+                minutes=settings.REFRESH_TOKEN_EXPIRE_MINUTES
             )
 
         to_encode = {"exp": expire, "sub": str(subject)}
-        encoded_jwt = jwt.encode(to_encode, self.JWT_REFRESH_SECRET_KEY, self.ALGORITHM)
+        encoded_jwt = jwt.encode(
+            to_encode, settings.JWT_REFRESH_SECRET_KEY, settings.ALGORITHM
+        )
         return encoded_jwt
 
     def auth_optional(self, func: Callable) -> Callable:
@@ -67,39 +61,138 @@ class JWTHandler:
                 print("Check access token...")
                 payload = jwt.decode(
                     access_token,
-                    self.JWT_SECRET_KEY,
-                    algorithms=[self.ALGORITHM],
+                    settings.JWT_SECRET_KEY,
+                    algorithms=[settings.ALGORITHM],
                 )
                 print("Access token is valid")
-            except ExpiredSignatureError:
-                print("Access token's exp is expired")
+            except InvalidTokenError:
+                print("Access token is expired or not valid")
                 try:
                     print("Check refresh token...")
                     payload = jwt.decode(
                         refresh_token,
-                        self.JWT_REFRESH_SECRET_KEY,
-                        algorithms=[self.ALGORITHM],
+                        settings.JWT_REFRESH_SECRET_KEY,
+                        algorithms=[settings.ALGORITHM],
                     )
                     print("Refresh token is valid")
                 except InvalidTokenError:
                     print("Refresh token is expired or not valid")
                     return await func(request, user=None)
-            except InvalidTokenError:
-                print("Access token is invalid")
-                return await func(request, user=None)
 
             print(f"Tokens are valid. User is {payload.get('sub')}")
             return await func(request, user=payload.get("sub"))
 
         return wrapper
 
-    # TODO
     def auth_required(self, func: Callable) -> Callable:
         async def wrapper(request: Request):
-            pass
+            access_token = request.cookies.get("access_token")
+            refresh_token = request.cookies.get("refresh_token")
+            if not (access_token and refresh_token):
+                print("Tokens not found in cookies")
+                raise HTTPException(
+                    status_code=401,
+                    detail=RESPONSE_MESSAGE.NO_TOKENS,
+                )
+
+            try:
+                print("Check access token...")
+                payload = jwt.decode(
+                    access_token,
+                    settings.JWT_SECRET_KEY,
+                    algorithms=[settings.ALGORITHM],
+                )
+                response = await func(request, user=payload.get("sub"))
+                print("Access token is valid")
+            except InvalidTokenError:
+                print("Access token is expired or not valid")
+                try:
+                    print("Check refresh token...")
+                    payload = jwt.decode(
+                        refresh_token,
+                        settings.JWT_REFRESH_SECRET_KEY,
+                        algorithms=[settings.ALGORITHM],
+                    )
+                    response = await func(request, user=payload.get("sub"))
+                    print("Create new access token...")
+                    new_access_token = self.create_access_token(
+                        subject=payload.get("sub")
+                    )
+                    response.set_cookie(
+                        key="access_token",
+                        value=new_access_token,
+                        max_age=settings.COOKIE_EXPIRE_SECONDS,
+                        expires=settings.COOKIE_EXPIRE_SECONDS,
+                        httponly=True,
+                    )
+                    print("Refresh token is valid")
+                except InvalidTokenError:
+                    print("Refresh token is expired or not valid")
+                    raise HTTPException(
+                        status_code=401,
+                        detail=RESPONSE_MESSAGE.INVALID_TOKENS,
+                    )
+            print(f"Tokens are valid. User is {payload.get('sub')}")
+            return response
+
+        return wrapper
+
+    # TODO
+    def ws_auth_required(self, func: Callable) -> Callable:
+        async def wrapper(self, websocket: WebSocket):
+            response = await func(self, websocket)
+
+            # eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2Nzc4MjQyOTksInN1YiI6ImFkbWluQGV4YW1wbGUuY29tIn0.FWt4wdQ0kyp-dPeL_yV3sIgH9oHKaO0jz4_K9BiEVsA
+            access_token = websocket.cookies.get("access_token")
+            refresh_token = websocket.cookies.get("refresh_token")
+            if not (access_token and refresh_token):
+                raise WebSocketDisconnect(
+                    code=1008,
+                    reason=RESPONSE_MESSAGE.NO_TOKENS,
+                )
+
+            # try:
+            #     print("Check access token...")
+            #     payload = jwt.decode(
+            #         access_token,
+            #         settings.JWT_SECRET_KEY,
+            #         algorithms=[settings.ALGORITHM],
+            #     )
+            #     response = await func(websocket, user=payload.get("sub"))
+            #     print("Access token is valid")
+            # except InvalidTokenError:
+            #     print("Access token is expired or not valid")
+            #     try:
+            #         print("Check refresh token...")
+            #         payload = jwt.decode(
+            #             refresh_token,
+            #             settings.JWT_REFRESH_SECRET_KEY,
+            #             algorithms=[settings.ALGORITHM],
+            #         )
+            #         response = await func(websocket, user=payload.get("sub"))
+            #         print("Create new access token...")
+            #         new_access_token = self.create_access_token(
+            #             subject=payload.get("sub")
+            #         )
+            #         response.set_cookie(
+            #             key="access_token",
+            #             value=new_access_token,
+            #             max_age=settings.COOKIE_EXPIRE_SECONDS,
+            #             expires=settings.COOKIE_EXPIRE_SECONDS,
+            #             httponly=True,
+            #         )
+            #         print("Refresh token is valid")
+            #     except InvalidTokenError:
+            #         print("Refresh token is expired or not valid")
+            #         raise HTTPException(
+            #             status_code=401,
+            #             detail=RESPONSE_MESSAGE.INVALID_TOKENS,
+            #         )
+            # print(f"Tokens are valid. User is {payload.get('sub')}")
+            return response
 
         return wrapper
 
 
 jwt_auth = JWTHandler()
-pass_handler = PasswordHandler()
+auth = AuthHandler()

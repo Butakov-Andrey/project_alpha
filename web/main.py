@@ -1,9 +1,9 @@
 from app_auth.router import rout_auth
 from app_auth.utils import jwt_auth
 from app_cash.router import rout_cash
-from config import STATUS_CODE, settings
-from exceptions import custom_http_exception_handler
-from fastapi import FastAPI, Request
+from config import settings
+from exceptions import custom_http_exception_handler, custom_ws_exception_handler
+from fastapi import FastAPI, Request, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
@@ -42,12 +42,9 @@ app.add_middleware(
 
 
 # home
-@app.get("/", status_code=STATUS_CODE.HTTP_200_OK, response_class=HTMLResponse)
+@app.get("/", status_code=200, response_class=HTMLResponse)
 @jwt_auth.auth_optional
-async def home(
-    request: Request,
-    user: str | None,
-) -> _TemplateResponse:
+async def home(request: Request, user: str | None) -> _TemplateResponse:
     context = {
         settings.REQUEST_FIELD: request,
         settings.USER_FIELD: user,
@@ -58,6 +55,7 @@ async def home(
 
 # exception Handlers
 app.add_exception_handler(HTTPException, custom_http_exception_handler)
+app.add_exception_handler(WebSocketDisconnect, custom_ws_exception_handler)
 
 # routers
 app.include_router(rout_auth)

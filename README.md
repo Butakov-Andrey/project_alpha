@@ -39,7 +39,9 @@ $ docker-compose exec web alembic upgrade head
 ```
 
 ## TODO:
-id поменять на uuid
+1. id поменять на uuid
+2. разобраться с параметрами cookie при создании токенов (https://gist.github.com/zmts/802dc9c3510d79fd40f9dc38a12bccfc)
+3. убрать print'ы
 
 ## Notes:
 
