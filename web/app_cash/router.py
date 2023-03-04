@@ -3,7 +3,7 @@ import asyncio
 import main
 from app_auth.utils import jwt_auth
 from config import TEMPLATE_FIELDS, settings
-from fastapi import APIRouter, Request, WebSocket
+from fastapi import APIRouter, Request, Response, WebSocket
 from fastapi.responses import HTMLResponse
 from managers import ws_manager
 
@@ -12,10 +12,14 @@ rout_cash = APIRouter()
 
 @rout_cash.get("/cash/", response_class=HTMLResponse)
 @jwt_auth.auth_required
-async def cash(request: Request, user: str):
+async def cash(request: Request, user: str) -> Response:
+    # TODO
+    csrf_token = request.cookies.get("csrftoken")
+
     context = {
         TEMPLATE_FIELDS.REQUEST: request,
         TEMPLATE_FIELDS.USER: user,
+        "test": csrf_token,
     }
     response = main.templates.TemplateResponse("cash/base.html", context)
     return response

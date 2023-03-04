@@ -6,12 +6,12 @@
     {% if user %}
         <h2>Log Out</h2>
         <p>Are you sure you want to log out?</p>
-        <form action="/auth/logout" method="post">
+        <form action="/auth/logout?csrf={{ test }}" method="post">
             <button class="logoutButton">Log Out</button>
         </form>
     {% else %}
         <h2>Log In</h2>
-        <form action="/auth/login" method="post">
+        <form action="/auth/login?csrf={{ test }}" method="post">
             <label>E-mail:
                 <input type="email" name="email" placeholder="E-mail address" autocomplete="email" required="">
             </label>

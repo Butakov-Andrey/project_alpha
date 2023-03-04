@@ -69,6 +69,8 @@ idna==3.4
     #   trio
 iniconfig==2.0.0
     # via pytest
+itsdangerous==2.1.2
+    # via starlette-csrf
 jinja2==3.1.2
     # via -r requirements.in
 mako==1.2.4
@@ -138,7 +140,11 @@ sqlalchemy==2.0.4
     #   -r requirements.in
     #   alembic
 starlette==0.25.0
-    # via fastapi
+    # via
+    #   fastapi
+    #   starlette-csrf
+starlette-csrf==2.0.0
+    # via -r requirements.in
 trio==0.22.0
     # via -r requirements.in
 types-pyopenssl==23.0.0.4

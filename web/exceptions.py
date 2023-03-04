@@ -33,11 +33,13 @@ async def custom_http_exception_handler(
             },
         )
     elif exc.status_code == 401:
+        # TODO
         return main.templates.TemplateResponse(
             "auth/account.html",
             {
                 TEMPLATE_FIELDS.REQUEST: request,
                 TEMPLATE_FIELDS.ERROR: exc.detail,
+                "test": request.cookies.get("csrftoken"),
             },
         )
     else:

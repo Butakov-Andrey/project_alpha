@@ -1,7 +1,7 @@
 import main
 from config import RESPONSE_MESSAGE, TEMPLATE_FIELDS, settings
 from dependencies import get_db
-from fastapi import APIRouter, Depends, Form, HTTPException, Request
+from fastapi import APIRouter, Depends, Form, Header, HTTPException, Request, Response
 from fastapi.responses import HTMLResponse, RedirectResponse
 from sqlalchemy.orm import Session
 
@@ -16,10 +16,14 @@ rout_auth = APIRouter(
 # external
 @rout_auth.get("/", status_code=200, response_class=HTMLResponse)
 @jwt_auth.auth_optional
-async def account(request: Request, user: str | None):
+async def account(request: Request, user: str | None) -> Response:
+    # TODO
+    csrf_token = request.cookies.get("csrftoken")
+
     context = {
         TEMPLATE_FIELDS.REQUEST: request,
         TEMPLATE_FIELDS.USER: user,
+        "test": csrf_token,
     }
     response = main.templates.TemplateResponse("auth/account.html", context)
     return response
@@ -28,10 +32,8 @@ async def account(request: Request, user: str | None):
 # internal
 @rout_auth.post("/login")
 async def login(
-    db: Session = Depends(get_db),
-    email: str = Form(...),
-    password: str = Form(...),
-):
+    db: Session = Depends(get_db), email: str = Form(...), password: str = Form(...)
+) -> Response:
     # check email and password
     user = get_user_by_email(db, email=email)
     if not (user and auth.check_password(password, str(user.hashed_password))):
@@ -62,7 +64,7 @@ async def login(
 
 
 @rout_auth.post("/logout", response_class=HTMLResponse)
-async def logout():
+async def logout() -> Response:
     response = RedirectResponse("/", status_code=303)
     response.delete_cookie("access_token")
     response.delete_cookie("refresh_token")

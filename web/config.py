@@ -17,12 +17,12 @@ class Settings(BaseSettings):
     JWT_SECRET_KEY: str
     JWT_REFRESH_SECRET_KEY: str
     # время жизни jwt токенов
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 1  # 30
-    REFRESH_TOKEN_EXPIRE_MINUTES: int = 2  # 60 * 24 * 7
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
+    REFRESH_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 7
     # время жизни cookie с jwt токенами
-    COOKIE_EXPIRE_SECONDS: int = 60 * 60 * 24 * 7  # REFRESH_TOKEN_EXPIRE_MINUTES * 60
-    # timeout websocket подключения при бездействии
-    WS_CONNECTION_TIMEOUT_SECONDS: int = 30 * 60  # ACCESS_TOKEN_EXPIRE_MINUTES * 60
+    COOKIE_EXPIRE_SECONDS: int = REFRESH_TOKEN_EXPIRE_MINUTES * 60
+    # timeout websockets подключения при бездействии
+    WS_CONNECTION_TIMEOUT_SECONDS: int = ACCESS_TOKEN_EXPIRE_MINUTES * 60
 
     # deploy
     SERVER_URL: str = "http://127.0.0.1:1337"
@@ -49,3 +49,4 @@ class TEMPLATE_FIELDS:
     REQUEST: str = "request"
     ERROR: str = "error"
     STATUS_CODE: str = "status_code"
+    CSRF: str = "csrftoken"
