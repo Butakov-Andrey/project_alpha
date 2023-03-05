@@ -1,8 +1,6 @@
 import main
 import pytest
 import pytest_asyncio
-from app_auth.utils import jwt_auth
-from config import settings
 from dependencies import get_db
 from fastapi.testclient import TestClient
 from httpx import AsyncClient
@@ -30,8 +28,10 @@ def data():
         "auth_user_pass_bad": "wrong_pass",
         "logout_mes": "Are you sure you want to log out?",
         "invalid_email_pass_mes": "Invalid email or password!",
-        "invalid_access_cookie": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2NzgwNDY2MzksInN1YiI6InRlc3RAZW1haWwuY29tIn0.N28XZZX_4tZjtdh-1yGEi5hRWt0ipzczOu3y9LpdGYs",
-        "invalid_refresh_cookie": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2Nzg2NDk2OTksInN1YiI6InRlc3RAZW1haWwuY29tIn0.sCqOefRD0xMBVUH_J7pZgUI211xBd8xCMTrgUMVFG34",
+        "invalid_tokens_mes": "Invalid tokens!",
+        "no_tokens_mes": "No tokens detected!",
+        "invalid_access_cookie": "invalid_access_token",
+        "invalid_refresh_cookie": "invalid_refresh_token",
     }
     return data
 
