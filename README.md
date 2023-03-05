@@ -39,11 +39,11 @@ $ docker-compose exec web alembic upgrade head
 ```
 
 ## TODO:
-1. id поменять на uuid
-2. разобраться с параметрами cookie при создании токенов (https://gist.github.com/zmts/802dc9c3510d79fd40f9dc38a12bccfc)
-3. Заменить принты на логи
-4. Переписать readme и комменты на англ.
-5. CSRF в декоратор
+1. Настроить CORS
+2. Заменить принты на логи
+3. Переписать readme и комменты на англ.
+4. Раздача статики с NGINX
+5. Выводить пользователю ошибки при login и signup
 
 ## Notes:
 

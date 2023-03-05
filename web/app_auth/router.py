@@ -1,45 +1,37 @@
 import main
 from config import RESPONSE_MESSAGE, TEMPLATE_FIELDS, settings
 from dependencies import get_db
-from fastapi import APIRouter, Depends, Form, Header, HTTPException, Request, Response
+from fastapi import APIRouter, Depends, Form, HTTPException, Request, Response
 from fastapi.responses import HTMLResponse, RedirectResponse
 from sqlalchemy.orm import Session
 
-from .crud import get_user_by_email
+from .crud import create_user, get_user_by_email, is_user_by_email_exist
 from .utils import auth, jwt_auth
 
-rout_auth = APIRouter(
-    prefix="/auth",
-)
+rout_auth = APIRouter(prefix="/auth")
 
 
-# external
-@rout_auth.get("/", status_code=200, response_class=HTMLResponse)
+@rout_auth.get("/")
 @jwt_auth.auth_optional
 async def account(request: Request, user: str | None) -> Response:
-    # TODO
-    csrf_token = request.cookies.get("csrftoken")
-
     context = {
         TEMPLATE_FIELDS.REQUEST: request,
         TEMPLATE_FIELDS.USER: user,
-        "test": csrf_token,
     }
-    response = main.templates.TemplateResponse("auth/account.html", context)
-    return response
+    return main.templates.TemplateResponse("auth/account.html", context)
 
 
-# internal
 @rout_auth.post("/login")
 async def login(
-    db: Session = Depends(get_db), email: str = Form(...), password: str = Form(...)
+    db: Session = Depends(get_db),
+    email: str = Form(...),
+    password: str = Form(...),
 ) -> Response:
-    # check email and password
     user = get_user_by_email(db, email=email)
     if not (user and auth.check_password(password, str(user.hashed_password))):
         raise HTTPException(
             status_code=401,
-            detail=RESPONSE_MESSAGE.INCORRECT_CREDENTIALS,
+            detail=RESPONSE_MESSAGE.INVALID_CREDENTIALS,
         )
 
     access_token = jwt_auth.create_access_token(subject=email)
@@ -63,9 +55,41 @@ async def login(
     return response
 
 
-@rout_auth.post("/logout", response_class=HTMLResponse)
+@rout_auth.post("/logout")
 async def logout() -> Response:
     response = RedirectResponse("/", status_code=303)
     response.delete_cookie("access_token")
     response.delete_cookie("refresh_token")
     return response
+
+
+@rout_auth.get("/signup")
+@jwt_auth.auth_optional
+async def signup(request: Request, user: str | None) -> Response:
+    context = {
+        TEMPLATE_FIELDS.REQUEST: request,
+        TEMPLATE_FIELDS.USER: user,
+    }
+    return main.templates.TemplateResponse("auth/signup.html", context)
+
+
+@rout_auth.post("/signup")
+async def signup_create(
+    request: Request,
+    db: Session = Depends(get_db),
+    email: str = Form(...),
+    password: str = Form(...),
+) -> Response:
+    if not auth.is_valid_email(email):
+        message = RESPONSE_MESSAGE.INVALID_EMAIL
+    elif is_user_by_email_exist(db, email=email):
+        message = RESPONSE_MESSAGE.EMAIL_EXIST
+    else:
+        create_user(db=db, email=email, password=password)
+        return RedirectResponse("/auth/login", status_code=307)
+
+    context = {
+        TEMPLATE_FIELDS.REQUEST: request,
+        TEMPLATE_FIELDS.MESSAGE: message,
+    }
+    return main.templates.TemplateResponse("auth/signup.html", context)

@@ -3,9 +3,10 @@ from typing import Any, Callable
 
 import bcrypt
 import jwt
-from config import RESPONSE_MESSAGE, settings
+from config import COOKIE, RESPONSE_MESSAGE, settings
 from fastapi import HTTPException, Request, WebSocket, WebSocketDisconnect
 from jwt.exceptions import InvalidTokenError
+from pydantic import EmailStr
 
 
 class AuthHandler:
@@ -16,6 +17,13 @@ class AuthHandler:
 
     def check_password(self, pass_from_user: str, hashed_pass_from_db: str) -> bool:
         return bcrypt.checkpw(pass_from_user.encode(), hashed_pass_from_db.encode())
+
+    def is_valid_email(self, email: str) -> bool:
+        try:
+            EmailStr.validate(email)
+            return True
+        except ValueError:
+            return False
 
 
 class JWTHandler:
@@ -51,8 +59,8 @@ class JWTHandler:
 
     def auth_optional(self, func: Callable) -> Callable:
         async def wrapper(request: Request):
-            access_token = request.cookies.get("access_token")
-            refresh_token = request.cookies.get("refresh_token")
+            access_token = request.cookies.get(COOKIE.ACCESS)
+            refresh_token = request.cookies.get(COOKIE.REFRESH)
             if not (access_token and refresh_token):
                 return await func(request, user=None)
             try:
@@ -76,8 +84,8 @@ class JWTHandler:
 
     def auth_required(self, func: Callable) -> Callable:
         async def wrapper(request: Request):
-            access_token = request.cookies.get("access_token")
-            refresh_token = request.cookies.get("refresh_token")
+            access_token = request.cookies.get(COOKIE.ACCESS)
+            refresh_token = request.cookies.get(COOKIE.REFRESH)
             if not (access_token and refresh_token):
                 raise HTTPException(status_code=401, detail=RESPONSE_MESSAGE.NO_TOKENS)
             try:

@@ -10,17 +10,15 @@ fastapi
 uvicorn
 email-validator
 bcrypt
+httpx
 # jwt
 PyJWT
 # websockets
 websockets
-# csrf
-starlette-csrf
 
 # tests
 pytest
 coverage
-httpx
 trio
 pytest-asyncio
 

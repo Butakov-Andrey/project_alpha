@@ -11,6 +11,7 @@ class Settings(BaseSettings):
     # redis
     REDIS_HOST: str
     REDIS_PORT: str
+    REDIS_DB: int
 
     # jwt
     ALGORITHM: str = "HS256"
@@ -39,7 +40,10 @@ settings = Settings()
 
 
 class RESPONSE_MESSAGE:
-    INCORRECT_CREDENTIALS: str = "Incorrect email or password!"
+    INVALID_CREDENTIALS: str = "Invalid email or password!"
+    INVALID_EMAIL: str = "Invalid email!"
+    EMAIL_EXIST: str = "Email exists!"
+
     NO_TOKENS: str = "No tokens detected!"
     INVALID_TOKENS: str = "Invalid tokens!"
 
@@ -48,5 +52,10 @@ class TEMPLATE_FIELDS:
     USER: str = "user"
     REQUEST: str = "request"
     ERROR: str = "error"
+    MESSAGE: str = "message"
     STATUS_CODE: str = "status_code"
-    CSRF: str = "csrftoken"
+
+
+class COOKIE:
+    ACCESS: str = "access_token"
+    REFRESH: str = "refresh_token"

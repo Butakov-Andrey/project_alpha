@@ -5,12 +5,10 @@ from config import TEMPLATE_FIELDS, settings
 from exceptions import custom_http_exception_handler, custom_ws_exception_handler
 from fastapi import FastAPI, Request, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from middleware.csrf import CSRFMiddleware
 from starlette.exceptions import HTTPException
-from starlette.templating import _TemplateResponse
 
 app = FastAPI(
     title="Project Alpha",
@@ -40,22 +38,15 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-# csrf
-app.add_middleware(CSRFMiddleware, secret="__CHANGE_ME__", header_name="csrftoken")
-# app.add_middleware(AddHeaderMiddleware)
 
 
 # home
 @app.get("/", status_code=200, response_class=HTMLResponse)
 @jwt_auth.auth_optional
-async def home(request: Request, user: str | None) -> _TemplateResponse:
-    # TODO
-    csrf_token = request.cookies.get("csrftoken")
-
+async def home(request: Request, user: str | None) -> Response:
     context = {
         TEMPLATE_FIELDS.REQUEST: request,
         TEMPLATE_FIELDS.USER: user,
-        "test": csrf_token,
     }
     response = templates.TemplateResponse("home.html", context)
     return response

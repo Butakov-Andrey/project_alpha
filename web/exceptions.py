@@ -1,7 +1,7 @@
 import main
 from config import TEMPLATE_FIELDS
 from fastapi import Request, WebSocket, WebSocketDisconnect
-from fastapi.responses import Response
+from fastapi.responses import RedirectResponse, Response
 from managers import ws_manager
 from starlette.exceptions import HTTPException
 from starlette.websockets import WebSocketState
@@ -11,6 +11,7 @@ async def custom_ws_exception_handler(
     websocket: WebSocket,
     exc: WebSocketDisconnect,
 ):
+    # TODO logger instead of prints
     print("WS disconnected!", exc.code, exc.reason)
     if exc.code == 1001:
         print("Client is leaving")
@@ -24,6 +25,7 @@ async def custom_http_exception_handler(
     exc: HTTPException,
 ) -> Response:
     if exc.status_code == 404:
+        # TODO Table of content
         return main.templates.TemplateResponse(
             "_exceptions/404.html",
             {
@@ -32,15 +34,9 @@ async def custom_http_exception_handler(
                 TEMPLATE_FIELDS.STATUS_CODE: exc.status_code,
             },
         )
-    elif exc.status_code == 401:
-        # TODO
-        return main.templates.TemplateResponse(
-            "auth/account.html",
-            {
-                TEMPLATE_FIELDS.REQUEST: request,
-                TEMPLATE_FIELDS.ERROR: exc.detail,
-                "test": request.cookies.get("csrftoken"),
-            },
-        )
-    else:
-        raise exc
+    if exc.status_code == 401:
+        # TODO logger instead of prints
+        print(exc.detail, exc.status_code)
+        return RedirectResponse("/auth/", status_code=303)
+    print(exc.status_code, exc.detail)
+    raise exc
