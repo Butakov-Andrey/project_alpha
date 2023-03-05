@@ -1,6 +1,8 @@
 import main
 import pytest
 import pytest_asyncio
+from app_auth.utils import jwt_auth
+from config import settings
 from dependencies import get_db
 from fastapi.testclient import TestClient
 from httpx import AsyncClient
@@ -11,6 +13,30 @@ from sqlalchemy.orm import Session
 SQLALCHEMY_DATABASE_URL = "sqlite:///./tests/test.db"
 
 
+# shared data
+@pytest.fixture(scope="class")
+def data():
+    data = {
+        "content_type": "text/html",
+        "home_title": "Home",
+        "signup": "Sign Up",
+        "login": "Log In",
+        "logout": "Log Out",
+        "email": "E-mail",
+        "pass": "Password",
+        "auth_user_email": "test@email.com",
+        "auth_user_pass": "test12345",
+        "auth_user_email_bad": "non_exist@email.com",
+        "auth_user_pass_bad": "wrong_pass",
+        "logout_mes": "Are you sure you want to log out?",
+        "invalid_email_pass_mes": "Invalid email or password!",
+        "invalid_access_cookie": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2NzgwNDY2MzksInN1YiI6InRlc3RAZW1haWwuY29tIn0.N28XZZX_4tZjtdh-1yGEi5hRWt0ipzczOu3y9LpdGYs",
+        "invalid_refresh_cookie": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2Nzg2NDk2OTksInN1YiI6InRlc3RAZW1haWwuY29tIn0.sCqOefRD0xMBVUH_J7pZgUI211xBd8xCMTrgUMVFG34",
+    }
+    return data
+
+
+# db
 @pytest.fixture(scope="session")
 def db_engine():
     engine = create_engine(SQLALCHEMY_DATABASE_URL)
@@ -18,7 +44,7 @@ def db_engine():
     yield engine
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture(scope="class")
 def db(db_engine):
     connection = db_engine.connect()
     transaction = connection.begin()
@@ -31,7 +57,8 @@ def db(db_engine):
     connection.close()
 
 
-@pytest_asyncio.fixture(scope="function")
+# clients
+@pytest_asyncio.fixture(scope="class")
 async def async_client(db):
     main.app.dependency_overrides[get_db] = lambda: db
 
@@ -39,9 +66,27 @@ async def async_client(db):
         yield async_client
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture(scope="class")
 def client(db):
     main.app.dependency_overrides[get_db] = lambda: db
 
     with TestClient(main.app) as client:
+        yield client
+
+
+@pytest.fixture(scope="class")
+def auth_client(db, data):
+    main.app.dependency_overrides[get_db] = lambda: db
+
+    with TestClient(
+        app=main.app,
+        base_url="http://127.0.0.1:1337",
+    ) as client:
+        client.post(
+            "/auth/signup/",
+            data={
+                "email": data.get("auth_user_email"),
+                "password": data.get("auth_user_pass"),
+            },
+        )
         yield client

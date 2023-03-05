@@ -2,7 +2,7 @@
 <html>
     <head>
         <meta charset="utf-8">
-        <title>{% block title %}404 Not Found{% endblock %}</title>
+        <title>{% block title %}401 Unauthorized{% endblock %}</title>
         <!-- css -->
         <link rel="stylesheet" href="{{ static }}/css/base.css">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/picnic">
@@ -11,9 +11,13 @@
         <div class="container">
             <h1>{{ error }}</h1>
             <p>Code - {{ status_code }}</p>
-            <a href="{{ server }}/" class="brand">
+
+            <p><a href="{{ server }}/" class="brand">
                 <span>Home</span>
-            </a>
+            </a></p>
+            <p><a href="{{ server }}/auth/" class="brand">
+                <span>Log In</span>
+            </a></p>
         <div>
     </body>
 </html>

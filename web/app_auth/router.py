@@ -2,7 +2,7 @@ import main
 from config import RESPONSE_MESSAGE, TEMPLATE_FIELDS, settings
 from dependencies import get_db
 from fastapi import APIRouter, Depends, Form, HTTPException, Request, Response
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 
 from .crud import create_user, get_user_by_email, is_user_by_email_exist
@@ -21,7 +21,7 @@ async def account(request: Request, user: str | None) -> Response:
     return main.templates.TemplateResponse("auth/account.html", context)
 
 
-@rout_auth.post("/login")
+@rout_auth.post("/")
 async def login(
     db: Session = Depends(get_db),
     email: str = Form(...),
@@ -30,7 +30,7 @@ async def login(
     user = get_user_by_email(db, email=email)
     if not (user and auth.check_password(password, str(user.hashed_password))):
         raise HTTPException(
-            status_code=401,
+            status_code=403,
             detail=RESPONSE_MESSAGE.INVALID_CREDENTIALS,
         )
 
@@ -86,7 +86,7 @@ async def signup_create(
         message = RESPONSE_MESSAGE.EMAIL_EXIST
     else:
         create_user(db=db, email=email, password=password)
-        return RedirectResponse("/auth/login", status_code=307)
+        return RedirectResponse("/auth/", status_code=307)
 
     context = {
         TEMPLATE_FIELDS.REQUEST: request,

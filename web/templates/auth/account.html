@@ -11,12 +11,14 @@
         </form>
     {% else %}
         <h2>Log In</h2>
-        <form action="/auth/login" method="post">
+        <form action="/auth/" method="post">
             <label>E-mail:
-                <input type="email" name="email" placeholder="E-mail address" autocomplete="email" required="">
+                <input type="email" name="email" placeholder="E-mail address"
+                    autocomplete="email" required="">
             </label>
             <label>Password:
-                <input type="password" name="password" placeholder="Password" autocomplete="current-password" required="">
+                <input type="password" name="password" placeholder="Password"
+                    autocomplete="current-password" required="">
             </label>
             <p><button type="submit">Log In</button></p>
         </form>

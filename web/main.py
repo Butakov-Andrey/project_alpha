@@ -5,7 +5,7 @@ from config import TEMPLATE_FIELDS, settings
 from exceptions import custom_http_exception_handler, custom_ws_exception_handler
 from fastapi import FastAPI, Request, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import HTMLResponse, Response
+from fastapi.responses import Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from starlette.exceptions import HTTPException
@@ -41,7 +41,7 @@ app.add_middleware(
 
 
 # home
-@app.get("/", status_code=200, response_class=HTMLResponse)
+@app.get("/", status_code=200)
 @jwt_auth.auth_optional
 async def home(request: Request, user: str | None) -> Response:
     context = {

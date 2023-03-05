@@ -44,9 +44,11 @@ $ docker-compose exec web alembic upgrade head
 3. Переписать readme и комменты на англ.
 4. Раздача статики с NGINX
 5. Выводить пользователю ошибки при login и signup
+6. Проверка пароля и глазик в форме для ввода
 
 ## Notes:
 
-docker-compose exec web coverage report -m 
+docker-compose exec web coverage run -m pytest
+docker-compose exec web coverage report -m
 
 docker-compose exec web python -m pytest -s
