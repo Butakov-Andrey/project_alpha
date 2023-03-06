@@ -4,6 +4,7 @@ import main
 from app_auth.utils import jwt_auth
 from config import TEMPLATE_FIELDS, settings
 from fastapi import APIRouter, Request, Response, WebSocket
+from loguru import logger
 from managers import ws_manager
 
 rout_cash = APIRouter()
@@ -29,7 +30,7 @@ async def websocket_endpoint(websocket: WebSocket):
                 timeout=settings.WS_CONNECTION_TIMEOUT_SECONDS,
             )
             await ws_manager.receive(websocket, data)
-        except asyncio.TimeoutError:
+        except asyncio.TimeoutError as exc:
             await ws_manager.disconnect(websocket)
-            print("Connection closed due to inactivity")
+            logger.info(f"WS connection closed due to inactivity! {exc}")
             break

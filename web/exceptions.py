@@ -2,6 +2,7 @@ import main
 from config import TEMPLATE_FIELDS
 from fastapi import Request, WebSocket, WebSocketDisconnect
 from fastapi.responses import Response
+from loguru import logger
 from managers import ws_manager
 from starlette.exceptions import HTTPException
 from starlette.websockets import WebSocketState
@@ -11,10 +12,9 @@ async def custom_ws_exception_handler(
     websocket: WebSocket,
     exc: WebSocketDisconnect,
 ):
-    # TODO logger instead of prints
-    print("WS disconnected!", exc.code, exc.reason)
+    logger.info(f"WS disconnected! {exc.code} {exc.reason}")
     if exc.code == 1001:
-        print("Client is leaving")
+        logger.info(f"Client is leaving! {exc.code} {exc.reason}")
     else:
         if websocket.application_state != WebSocketState.DISCONNECTED:
             await ws_manager.disconnect(websocket)

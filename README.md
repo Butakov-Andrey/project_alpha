@@ -37,18 +37,19 @@ $ docker-compose exec web alembic revision --autogenerate -m "Testing table"
 ```
 $ docker-compose exec web alembic upgrade head
 ```
+Запуск тестов (-s для вывода print):
+```
+$ docker-compose exec web python -m pytest
+```
+Покрытие тестами:
+```
+$ docker-compose exec web coverage run -m pytest
+$ docker-compose exec web coverage report -m
+```
 
 ## TODO:
-1. Настроить CORS
-2. Заменить принты на логи
-3. Переписать readme и комменты на англ.
-4. Раздача статики с NGINX
-5. Выводить пользователю ошибки при login и signup
-6. Проверка пароля и глазик в форме для ввода
-
-## Notes:
-
-docker-compose exec web coverage run -m pytest
-docker-compose exec web coverage report -m
-
-docker-compose exec web python -m pytest -s
+1. CORS
+2. Add logs
+3. Readme on english
+4. Static from NGINX
+5. Show/hide password in forms
