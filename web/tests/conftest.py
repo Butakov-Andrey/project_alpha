@@ -14,7 +14,7 @@ SQLALCHEMY_DATABASE_URL = "sqlite:///./tests/test.db"
 # shared data
 @pytest.fixture(scope="class")
 def data():
-    data = {
+    return {
         "content_type": "text/html",
         "home_title": "Home",
         "signup": "Sign Up",
@@ -22,18 +22,19 @@ def data():
         "logout": "Log Out",
         "email": "E-mail",
         "pass": "Password",
-        "auth_user_email": "test@email.com",
-        "auth_user_pass": "test12345",
-        "auth_user_email_bad": "non_exist@email.com",
-        "auth_user_pass_bad": "wrong_pass",
         "logout_mes": "Are you sure you want to log out?",
         "invalid_email_pass_mes": "Invalid email or password!",
         "invalid_tokens_mes": "Invalid tokens!",
         "no_tokens_mes": "No tokens detected!",
+        "exist_email_mes": "Email exists!",
+        "invalid_email_mes": "Invalid email!",
+        "auth_user_email": "test@email.com",
+        "auth_user_pass": "test12345",
+        "auth_user_email_bad": "non_exist@email.com",
+        "auth_user_pass_bad": "wrong_pass",
         "invalid_access_cookie": "invalid_access_token",
         "invalid_refresh_cookie": "invalid_refresh_token",
     }
-    return data
 
 
 # db

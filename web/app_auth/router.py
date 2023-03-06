@@ -66,6 +66,8 @@ async def logout() -> Response:
 @rout_auth.get("/signup")
 @jwt_auth.auth_optional
 async def signup(request: Request, user: str | None) -> Response:
+    if user:
+        return RedirectResponse("/", status_code=303)
     context = {
         TEMPLATE_FIELDS.REQUEST: request,
         TEMPLATE_FIELDS.USER: user,
