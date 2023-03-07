@@ -1,3 +1,5 @@
+import os
+
 from pydantic import BaseSettings
 
 
@@ -31,7 +33,7 @@ class Settings(BaseSettings):
     ORIGINS: list[str] = [SERVER_URL]
 
     class Config:
-        env_file = ".env"
+        env_file = os.getenv("ENV_FILE")
         env_file_encoding = "utf-8"
         case_sensitive = True
 
