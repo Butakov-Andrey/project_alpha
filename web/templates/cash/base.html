@@ -4,9 +4,11 @@
 
 {% block htmx %}
     <!-- HTMX -->
-    <script src="https://unpkg.com/htmx.org@1.8.5" integrity="sha384-7aHh9lqPYGYZ7sTHvzP1t3BAfLhYSTy9ArHdP3Xsr9/3TlGurYgcPBoFmXX2TX/w" crossorigin="anonymous"></script>
+    <!-- https://unpkg.com/browse/htmx.org@1.8.6/dist/ -->
+    <script src="{{ server }}/js/htmx.js"></script>
     <!-- HTMX websockets -->
-    <script src="https://unpkg.com/htmx.org/dist/ext/ws.js"></script>
+    <!-- https://unpkg.com/browse/htmx.org@1.8.6/dist/ext/ -->
+    <script src="{{ server }}/js/ws.js"></script>
 {% endblock %}
 
 {% block content %}

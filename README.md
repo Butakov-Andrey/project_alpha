@@ -51,8 +51,7 @@ $ docker-compose exec web coverage report -m
 
 ## TODO:
 1. CORS
-2. Add logs
-3. Static from NGINX
-4. Show/hide password in forms
-5. GitHub actions
-6. lru_cache for settngs
+2. Show/hide password in forms
+3. Dark theme
+4. Cache
+

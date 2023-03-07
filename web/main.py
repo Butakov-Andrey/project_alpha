@@ -7,7 +7,6 @@ from exceptions import custom_http_exception_handler, custom_ws_exception_handle
 from fastapi import Depends, FastAPI, Request, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response
-from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from logger import add_loggers
 from starlette.exceptions import HTTPException
@@ -29,11 +28,7 @@ add_loggers()
 
 # templates
 templates = Jinja2Templates(directory="templates/")
-templates.env.globals["static"] = settings.STATIC_URL
 templates.env.globals["server"] = settings.SERVER_URL
-
-# static
-app.mount("/static", StaticFiles(directory="static"))
 
 # cors
 app.add_middleware(

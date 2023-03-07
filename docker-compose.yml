@@ -67,6 +67,7 @@ services:
       dockerfile: docker/nginx.Dockerfile
     volumes:
       - ./nginx/:/etc/nginx/conf.d
+      - ./web/static/:/static
     ports:
       - 1337:80
     depends_on:
