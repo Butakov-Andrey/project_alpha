@@ -5,20 +5,20 @@ from pydantic import BaseSettings
 
 class Settings(BaseSettings):
     # postgres
-    POSTGRES_USER: str
-    POSTGRES_PASSWORD: str
-    POSTGRES_DB: str
-    POSTGRES_HOST: str
+    POSTGRES_USER: str = "postgres"
+    POSTGRES_PASSWORD: str = "pass"
+    POSTGRES_DB: str = "postgres"
+    POSTGRES_HOST: str = "postgres"
 
     # redis
-    REDIS_HOST: str
-    REDIS_PORT: str
-    REDIS_DB: int
+    REDIS_HOST: str = "redis"
+    REDIS_PORT: int = 6379
+    REDIS_DB: int = 0
 
     # jwt
     ALGORITHM: str = "HS256"
-    JWT_SECRET_KEY: str
-    JWT_REFRESH_SECRET_KEY: str
+    JWT_SECRET_KEY: str = "secret_key"
+    JWT_REFRESH_SECRET_KEY: str = "refresh_secret_key"
     # время жизни jwt токенов
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     REFRESH_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 7
