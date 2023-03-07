@@ -1,47 +1,48 @@
 # Project Alpha
-Проект реализован в виде монорепозитория для микросервисов backend и frontend  
+Fastapi web-app without frontend frameworks.
 
-Установить pip-tools, создать requirements.txt и установить зависимости  
-(необходимо находиться в директории с *requirements.in*):
+## Requirements
+To install the required dependencies, run the following commands:
 ```
 $ pip install pip-tools
-$ pip-compile
-$ pip-sync
+$ pip-compile ./web/requirements.in
 ```
-Установить pre-commit хуки:
+## Pre-commit
+Install pre-commit to ensure code quality and consistency:
 ```
 $ pip install pre-commit
 $ pre-commit install
 ```
-[Указать директорию](.pre-commit-config.yaml) с приложением в которой будут отрабатывать pre-commit хуки:  
+[Specify the app directory](.pre-commit-config.yaml) in which the pre-commit hooks will run:  
 ```
 files: ^(web)
 ```
-И [директорию](.pre-commit-config.yaml), которую pre-commit хуки должны игнорировать:
+[Specify the app directory](.pre-commit-config.yaml) that pre-commit hooks should ignore:  
 ```
 exclude: (?x).*/alembic($|/.*)
 ```
-Создание образов и запуск контейнеров:
+## Build containers
+To build the Docker containers, run:
 ```
 $ docker-compose up -d --build
 ```
 
-## Web
-Создать директорию *web/alembic/versions/*  
-Cоздать миграции ("web" - имя контейнера, в котором будут создаваться миграции):
+## Database migrations
+Create the *web/alembic/versions/* directory and make migrations:  
 ```
 $ docker-compose exec web alembic revision --autogenerate -m "Testing table"
 ```
-Проверить сгенерированные миграции в директории *backend/web/alembic/versions/*  
-Применить миграции и обновить базу данных:
+Check migrations in *backend/web/alembic/versions/*.  
+Upgrade the database:
 ```
 $ docker-compose exec web alembic upgrade head
 ```
-Запуск тестов (-s для вывода print):
+## Testing
+Run tests with the following command:  
 ```
 $ docker-compose exec web python -m pytest
 ```
-Покрытие тестами:
+To check test coverage, run:
 ```
 $ docker-compose exec web coverage run -m pytest
 $ docker-compose exec web coverage report -m
@@ -50,6 +51,6 @@ $ docker-compose exec web coverage report -m
 ## TODO:
 1. CORS
 2. Add logs
-3. Readme on english
-4. Static from NGINX
-5. Show/hide password in forms
+3. Static from NGINX
+4. Show/hide password in forms
+5. GitHub actions
