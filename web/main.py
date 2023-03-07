@@ -48,10 +48,7 @@ app.add_middleware(
 # home
 @app.get("/", status_code=200, dependencies=[Depends(logging)])
 @jwt_auth.auth_optional
-async def home(
-    request: Request,
-    user: str | None,
-) -> Response:
+async def home(request: Request, user: str | None) -> Response:
     context = {
         TEMPLATE_FIELDS.REQUEST: request,
         TEMPLATE_FIELDS.USER: user,

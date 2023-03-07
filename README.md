@@ -22,8 +22,9 @@ files: ^(web)
 exclude: (?x).*/alembic($|/.*)
 ```
 ## Build containers
-To build the Docker containers, run:
+To set env-file and build the Docker containers, run:
 ```
+$ export ENV_FILE=./example.env
 $ docker-compose up -d --build
 ```
 
@@ -54,3 +55,4 @@ $ docker-compose exec web coverage report -m
 3. Static from NGINX
 4. Show/hide password in forms
 5. GitHub actions
+6. lru_cache for settngs

@@ -25,7 +25,7 @@ services:
       - postgres
       - redis
     env_file:
-      - ./.env
+      - ${ENV_FILE}
     networks:
       - alpha_network
 
@@ -40,7 +40,7 @@ services:
     ports:
       - 5432:5432
     env_file:
-      - ./.env
+      - ${ENV_FILE}
     networks:
       - alpha_network
 
@@ -55,7 +55,7 @@ services:
     ports:
       - 6379:6379
     env_file:
-      - ./.env
+      - ${ENV_FILE}
     networks:
       - alpha_network
 
