@@ -26,6 +26,7 @@ services:
       - redis
     env_file:
       - ./.env
+      - ./example.env
     networks:
       - alpha_network
 
@@ -41,6 +42,7 @@ services:
       - 5432:5432
     env_file:
       - ./.env
+      - ./example.env
     networks:
       - alpha_network
 
@@ -56,6 +58,7 @@ services:
       - 6379:6379
     env_file:
       - ./.env
+      - ./example.env
     networks:
       - alpha_network
 
