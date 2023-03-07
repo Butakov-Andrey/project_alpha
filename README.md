@@ -24,7 +24,7 @@ exclude: (?x).*/alembic($|/.*)
 ## Build containers
 To build the Docker containers, run:
 ```
-$ docker-compose up -d --build
+$ ENV_FILE=./example.env docker-compose up -d --build
 ```
 
 ## Database migrations
