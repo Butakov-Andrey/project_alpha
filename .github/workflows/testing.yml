@@ -19,10 +19,8 @@ jobs:
     - run: echo "The ${{ github.repository }} repository has been cloned to the runner."
     - name: Create env-file
       run: echo "${{ secrets.ENV_FILE }}" > example.env
-    - name: Set env-file
-      run: export ENV_FILE=./example.env
     - name: Run docker-compose
-      run: docker-compose up -d
+      run: ENV_FILE=./example.env docker-compose up -d
     - name: Run tests
-      run: docker-compose exec -T web python -m pytest
+      run: ENV_FILE=./example.env docker-compose exec -T web python -m pytest
     - run: echo "🍏 This job's status is ${{ job.status }}."
