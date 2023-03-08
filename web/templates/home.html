@@ -4,7 +4,64 @@
 
 {% block content %}
     <h1>Homepage</h1>
-    <a href="{{ server }}/cash/" class="brand">
-        <span>Cash</span>
-    </a>
+
+    <div class="tabs three" style="text-align: center;">
+        <input id="tabC-1" type="radio" name="tabgroupC" checked="">
+        <label class="pseudo button toggle" for="tabC-1">Cash</label>
+        <input id="tabC-2" type="radio" name="tabgroupC">
+        <label class="pseudo button toggle" for="tabC-2">Notes</label>
+        <input id="tabC-3" type="radio" name="tabgroupC">
+        <label class="pseudo button toggle" for="tabC-3">Profile</label>
+
+        <div class="row">
+            <div>
+                <div class="card" style="margin: 0 20px;">
+                <header><h3>Cash app</h3></header>
+                <p>
+                    Cash app description
+                </p>
+                <footer style="text-align: center;">
+                    {% if user %}
+                    <a href="{{ server }}/cash/" class="button">
+                        Link for app
+                    </a>
+                    {% endif %}
+                </footer>
+                </div>
+            </div>
+
+            <div>
+                <div class="card" style="margin: 0 20px;">
+                <header><h3>Notes app</h3></header>
+                <p>
+                    Notes app description
+                </p>
+                <footer style="text-align: center;">
+                    {% if user %}
+                    <a href="#" class="button">
+                        In development...
+                    </a>
+                    {% endif %}
+                </footer>
+                </div>
+            </div>
+
+            <div>
+                <div class="card" style="margin: 0 20px;">
+                <header><h3>Profile app</h3></header>
+                <p>
+                    Profile app description
+                </p>
+                <footer style="text-align: center;">
+                    {% if user %}
+                    <a href="#" class="button">
+                        In development...
+                    </a>
+                    {% endif %}
+                </footer>
+                </div>
+            </div>
+        </div>
+    </div>
+
 {% endblock  %}
