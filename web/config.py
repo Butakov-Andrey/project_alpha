@@ -29,7 +29,6 @@ class Settings(BaseSettings):
 
     # deploy
     SERVER_URL: str = "http://127.0.0.1:1337"
-    STATIC_URL: str = f"{SERVER_URL}/static"
     ORIGINS: list[str] = [SERVER_URL]
 
     class Config:

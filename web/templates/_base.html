@@ -4,8 +4,8 @@
         <meta charset="utf-8">
         <title>{% block title %}Project Alpha{% endblock %}</title>
         <!-- css -->
-        <link rel="stylesheet" href="{{ static }}/css/base.css">
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/picnic">
+        <link rel="stylesheet" href="{{ server }}/css/picnic.min.css">
+        <link rel="stylesheet" href="{{ server }}/css/base.css">
         {% block htmx %}
         {% endblock %}
     </head>
@@ -18,14 +18,14 @@
             <div class="menu">
                 {% if user %}
                     {{ user }}
-                    <a href="{{ server }}/auth/" class="pseudo button icon-picture">
+                    <a href="{{ server }}/auth/" class="pseudo button">
                         Log Out
                     </a>
                 {% else %}
-                    <a href="{{ server }}/auth/signup" class="pseudo button icon-picture">
+                    <a href="{{ server }}/auth/signup" class="pseudo button">
                         Sign Up
                     </a>
-                    <a href="{{ server }}/auth/" class="pseudo button icon-picture">
+                    <a href="{{ server }}/auth/" class="pseudo button">
                         Log In
                     </a>
                 {% endif %}

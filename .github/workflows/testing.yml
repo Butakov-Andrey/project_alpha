@@ -23,4 +23,4 @@ jobs:
       run: ENV_FILE=./example.env docker-compose up -d
     - name: Run tests
       run: ENV_FILE=./example.env docker-compose exec -T web python -m pytest
-    - run: echo "🍏 This job's status is ${{ job.status }}."
+    - run: echo "This job's status is ${{ job.status }}."

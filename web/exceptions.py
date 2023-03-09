@@ -35,7 +35,6 @@ async def custom_http_exception_handler(
             status_code=401,
         )
     if exc.status_code == 403:
-
         return main.templates.TemplateResponse(
             "auth/account.html",
             context={
@@ -46,7 +45,6 @@ async def custom_http_exception_handler(
             status_code=403,
         )
     if exc.status_code == 404:
-        # TODO Table of content
         return main.templates.TemplateResponse(
             "_exceptions/404.html",
             {
