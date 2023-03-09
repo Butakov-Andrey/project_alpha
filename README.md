@@ -24,7 +24,7 @@ exclude: (?x).*/alembic($|/.*)
 ## Build containers
 To set env-file and build the Docker containers, run:
 ```
-$ export ENV_FILE=./example.env
+$ export ENV_FILE=./.env
 $ docker-compose up -d --build
 ```
 
@@ -52,6 +52,5 @@ $ docker-compose exec web coverage report -m
 ## TODO:
 1. CORS
 2. Show/hide password in forms
-3. Dark theme
-4. Cache
+3. Cache
 
